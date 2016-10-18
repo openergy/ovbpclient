@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 from pkg_resources import parse_requirements
 import os
 
-with open(os.path.join("outil", "version.py")) as f:
+with open(os.path.join("openergy", "version.py")) as f:
     version = f.read().split("=")[1].strip().strip("'").strip('"')
 
 
