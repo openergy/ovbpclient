@@ -10,7 +10,7 @@ class Unitcleaner:
 
 
 class CleanerConfigurator:
-    def __init__(self, cleaner_uid, client=None):
+    def __init__(self, cleaner_uid):
         """
         Parameters
         ----------
@@ -18,7 +18,7 @@ class CleanerConfigurator:
         client: optional
         """
 
-        self.client = get_client(client=client)
+        self.client = get_client()
 
         if isinstance(cleaner_uid, str):
             self.cleaner_id = cleaner_uid

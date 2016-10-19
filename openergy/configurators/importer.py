@@ -1,18 +1,15 @@
-import os
-
 from ..client import get_client
-from ..outil.json import load
 
 
 class ImporterConfigurator:
-    def __init__(self, importer_uid, client=None):
+    def __init__(self, importer_uid):
         """
         Parameters
         ----------
         importer_uid: importer_id or (project_id, importer_name)
         client: optional
         """
-        self.client = get_client(client=client)
+        self.client = get_client()
 
         if isinstance(importer_uid, str):
             self.importer_id = importer_uid

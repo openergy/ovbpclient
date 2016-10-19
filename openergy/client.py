@@ -1,6 +1,6 @@
 from .outil.requests import RESTClient
 
-_clients = {}
+_client = None
 
 
 class Client(RESTClient):
@@ -17,17 +17,11 @@ class Client(RESTClient):
 
 
 def set_client(login, password, host, port=443):
-    global _clients
-    _clients["__default__"] = Client(login, password, host, port=port)
+    global _client
+    _client = Client(login, password, host, port=port)
+    return _client
 
 
-def get_client(client=None):
-    global _clients
-    if client is None:
-        default_client = _clients.get("__default__")
-    else:
-        default_client = client
-
-    assert isinstance(default_client, RESTClient), "client must be set (and be a RESTClient object)"
-
-    return default_client
+def get_client():
+    global _client
+    return _client
