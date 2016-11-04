@@ -28,6 +28,10 @@ pandas>=0.16.2,<0.17
 
 (p): patch, (m): minor, (M): major
 
+### 1.0.0
+* (m): list_iter_series created
+* (M): first official release
+
 ### 0.3.0
 * (m): client simplified
 * (m): get_series_info added to api

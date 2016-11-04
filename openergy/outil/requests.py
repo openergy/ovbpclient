@@ -58,7 +58,7 @@ class RequestsClient:
 
 
 class RESTClient(RequestsClient):
-    def __init__(self, host, port, credentials=None, root_endpoint="", is_on_resource="/", verify_ssl=False):
+    def __init__(self, host, port, credentials=None, root_endpoint="", is_on_resource="/", verify_ssl=True):
         """
         is_on_resource: put None if you don't want to use it
         """
@@ -71,6 +71,20 @@ class RESTClient(RequestsClient):
         resource = resource.strip("/")
         rep = self.session.get("%s/%s/" % (self.base_endpoint_url, resource), params=params, verify=self.verify_ssl)
         return self.rep_to_json(rep)
+
+    def list_iter_all(self, resource, params=None):
+        start = 0
+        if params is None:
+            params = {}
+        while True:
+            params["start"] = start
+            current = self.list(resource, params=params)
+            data = current["data"]
+            if len(data) == 0:  # todo: should not need to perform last request
+                break
+            start += len(data)
+            for element in data:
+                yield element
 
     def retrieve(self, resource, resource_id):
         resource = resource.strip("/")
