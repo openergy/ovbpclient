@@ -28,6 +28,14 @@ pandas>=0.16.2,<0.17
 
 (p): patch, (m): minor, (M): major
 
+### 2.0.0
+* (m): platform_to_excel added
+* (M): cleaner batch_configure renamed to excel_to_platform
+* (M): importer client kwarg removed
+* (m): requests list_iter_all added
+* (m): client management changed
+* (m): util get_series_info added
+
 ### 1.0.0
 * (m): list_iter_series created
 * (M): first official release
