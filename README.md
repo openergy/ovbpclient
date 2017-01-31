@@ -28,6 +28,9 @@ pandas>=0.16.2,<0.17
 
 (p): patch, (m): minor, (M): major
 
+### 2.0.1
+* (p): multiclean_config_model.xlsx added to MANIFEST.in
+
 ### 2.0.0
 * (m): platform_to_excel added
 * (M): cleaner batch_configure renamed to excel_to_platform

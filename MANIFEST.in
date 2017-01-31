@@ -1,2 +1,3 @@
 include README.md
 include requirements-conda.txt
+include openergy/configurators/resources/multiclean_config_model.xlsx
