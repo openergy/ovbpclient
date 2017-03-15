@@ -28,6 +28,9 @@ pandas>=0.16.2,<0.17
 
 (p): patch, (m): minor, (M): major
 
+### 2.0.2
+* (m) pandas requirements were loosened
+
 ### 2.0.1
 * (p): multiclean_config_model.xlsx added to MANIFEST.in
 
