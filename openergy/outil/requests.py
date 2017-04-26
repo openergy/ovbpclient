@@ -80,6 +80,8 @@ class RESTClient(RequestsClient):
             params["start"] = start
             current = self.list(resource, params=params)
             data = current["data"]
+            #print(current)
+            #print(len(data))
             if len(data) == 0:  # todo: should not need to perform last request
                 break
             start += len(data)

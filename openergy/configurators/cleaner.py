@@ -47,10 +47,10 @@ class CleanerConfigurator:
     # Platform To Excel
 
     def get_unitcleaners(self):
-        return self.client.list(
+        return self.client.list_iter_all(
             "opmeasures_cleaners/unitcleaners/",
             params=dict(cleaner=self.cleaner_id)
-        )["data"]
+        )
 
     def get_cleaner_data(self):
         return self.client.retrieve(
@@ -65,10 +65,10 @@ class CleanerConfigurator:
         )
 
     def get_importerseries(self):
-        return self.client.list(
+        return self.client.list_iter_all(
             "opmeasures_cleaners/importerseries",
             params=dict(cleaner=self.get_cleaner_data()['importer'])
-        )["data"]
+        )
 
     def get_not_configured_series(self):
         not_configured_series = []
@@ -86,7 +86,7 @@ class CleanerConfigurator:
 
         project_data = self.get_project_data()
         cleaner_data= self.get_cleaner_data()
-        configured_series = self.get_unitcleaners()
+        configured_series = list(self.get_unitcleaners()) #get_unitcleaners() returns a generator
         not_configured_series = self.get_not_configured_series()
 
         for k in ("id", "input_series", "last_clear", "last_run", "cleaner"):
@@ -260,13 +260,14 @@ class CleanerConfigurator:
 
 
 
-        # Excel To Platform
+    # Excel To Platform
 
     def configure_unit_cleaner(self, data, update_if_exists=False):
-        unitcleaner_l = self.client.list(
+        unitcleaners = self.client.list_iter_all(
             "opmeasures_cleaners/unitcleaners/",
             params=dict(cleaner=self.cleaner_id, external_name=data["external_name"])
-        )["data"]
+        )
+        unitcleaner_l = list(unitcleaners)
         if len(unitcleaner_l) == 1:
             if not update_if_exists:
                 raise AssertionError("unitcleaner already exists, can't create (use update_if_exists=True)")
@@ -279,13 +280,13 @@ class CleanerConfigurator:
 
     def excel_to_platform(self, xlsx_path, update_if_exists=False):
         unitcleaners = batch_configure(xlsx_path)
+        print(len(unitcleaners))
         for uc in unitcleaners:
             try:
                 data = dict(cleaner=self.cleaner_id)
                 for k, v in uc.data.items():
-                    if v is None:
-                        continue
-                    data[k] = v
+                    data[k] = v if v is not None else ''
+                print(data)
                 self.configure_unit_cleaner(data, update_if_exists=update_if_exists)
             except Exception:
                 name = getattr(uc, "external_name", "Unknown (no external name provided).")
@@ -316,17 +317,17 @@ def batch_configure(path, max_input_length=20000):
                 unit=ws['J{}'.format(row)].value,
                 label=ws['K{}'.format(row)].value,
                 input_expected_regular= ws['L{}'.format(row)].value == 'yes', #Boolean could be better managed.
-                unit_type=ws['M{}'.format(row)].value,
-                resample_rule=ws['N{}'.format(row)].value,
-                interpolate_limit=ws['O{}'.format(row)].value,
-                wait_offset=ws['P{}'.format(row)].value,
-                operation_fct=ws['Q{}'.format(row)].value,
-                filter_fct=ws['R{}'.format(row)].value,
-                derivative_filter_fct=ws['S{}'.format(row)].value,
-                custom_delay=ws['T{}'.format(row)].value,
-                custom_fct=ws['U{}'.format(row)].value,
-                custom_before_offset=ws['V{}'.format(row)].value,
-                custom_after_offset=ws['W{}'.format(row)].value
+                unit_type=ws['M{}'.format(row)].value if ws['M{}'.format(row)].value else ws['F{}'.format(row)].value,
+                resample_rule=ws['N{}'.format(row)].value if ws['N{}'.format(row)].value else 'mean',
+                interpolate_limit=ws['O{}'.format(row)].value if ws['O{}'.format(row)].value else 0,
+                wait_offset=ws['P{}'.format(row)].value if ws['P{}'.format(row)].value else '6H',
+                operation_fct=ws['Q{}'.format(row)].value if ws['Q{}'.format(row)].value else None,
+                filter_fct=ws['R{}'.format(row)].value if ws['R{}'.format(row)].value else None,
+                derivative_filter_fct=ws['S{}'.format(row)].value if ws['S{}'.format(row)].value else None,
+                custom_delay=ws['T{}'.format(row)].value if ws['T{}'.format(row)].value else None,
+                custom_fct=ws['U{}'.format(row)].value if ws['U{}'.format(row)].value else None,
+                custom_before_offset=ws['V{}'.format(row)].value if ws['V{}'.format(row)].value else None,
+                custom_after_offset=ws['W{}'.format(row)].value if ws['W{}'.format(row)].value else None
             ))
 
     return unitcleaners
