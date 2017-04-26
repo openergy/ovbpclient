@@ -303,6 +303,7 @@ def batch_configure(path, max_input_length=20000):
             elif ws['D{}'.format(row)].value == 'no':
                 ws['D{}'.format(row)].value = 'false'
             unitcleaners.append(Unitcleaner(
+                # An empty cell is None
                 external_name=ws['A{}'.format(row)].value,
                 name=ws['B{}'.format(row)].value if ws['B{}'.format(row)].value else ws['A{}'.format(row)].value,
                 active=ws['D{}'.format(row)].value,
@@ -311,20 +312,20 @@ def batch_configure(path, max_input_length=20000):
                 input_convention=ws['G{}'.format(row)].value,
                 clock=ws['H{}'.format(row)].value,
                 timezone=ws['I{}'.format(row)].value,
-                unit=ws['J{}'.format(row)].value,
-                label=ws['K{}'.format(row)].value,
+                unit=ws['J{}'.format(row)].value if ws['J{}'.format(row)].value is not None else '',
+                label=ws['K{}'.format(row)].value if ws['K{}'.format(row)].value is not None else '',
                 input_expected_regular= ws['L{}'.format(row)].value == 'yes', #Boolean could be better managed.
-                unit_type=ws['M{}'.format(row)].value if ws['M{}'.format(row)].value else ws['F{}'.format(row)].value,
-                resample_rule=ws['N{}'.format(row)].value if ws['N{}'.format(row)].value else 'mean',
-                interpolate_limit=ws['O{}'.format(row)].value if ws['O{}'.format(row)].value else 0,
-                wait_offset=ws['P{}'.format(row)].value if ws['P{}'.format(row)].value else '6H',
-                operation_fct=ws['Q{}'.format(row)].value if ws['Q{}'.format(row)].value else None,
-                filter_fct=ws['R{}'.format(row)].value if ws['R{}'.format(row)].value else None,
-                derivative_filter_fct=ws['S{}'.format(row)].value if ws['S{}'.format(row)].value else None,
-                custom_delay=ws['T{}'.format(row)].value if ws['T{}'.format(row)].value else None,
-                custom_fct=ws['U{}'.format(row)].value if ws['U{}'.format(row)].value else None,
-                custom_before_offset=ws['V{}'.format(row)].value if ws['V{}'.format(row)].value else None,
-                custom_after_offset=ws['W{}'.format(row)].value if ws['W{}'.format(row)].value else None
+                unit_type=ws['M{}'.format(row)].value if ws['M{}'.format(row)].value is not None else ws['F{}'.format(row)].value,
+                resample_rule=ws['N{}'.format(row)].value if ws['N{}'.format(row)].value is not None else 'mean',
+                interpolate_limit=ws['O{}'.format(row)].value if ws['O{}'.format(row)].value is not None else 0,
+                wait_offset=ws['P{}'.format(row)].value if ws['P{}'.format(row)].value is not None else '6H',
+                operation_fct=ws['Q{}'.format(row)].value,
+                filter_fct=ws['R{}'.format(row)].value,
+                derivative_filter_fct=ws['S{}'.format(row)].value,
+                custom_delay=ws['T{}'.format(row)].value,
+                custom_fct=ws['U{}'.format(row)].value,
+                custom_before_offset=ws['V{}'.format(row)].value,
+                custom_after_offset=ws['W{}'.format(row)].value
             ))
 
     return unitcleaners
