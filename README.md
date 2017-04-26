@@ -28,6 +28,11 @@ pandas>=0.16.2,<0.17
 
 (p): patch, (m): minor, (M): major
 
+### 2.1.0
+* m: iter_unitcleaners and iter_importer_series added
+* p: empty values of excel unitcleaners are now managed properly
+
+
 ### 2.0.2
 * (m) pandas requirements were loosened
 

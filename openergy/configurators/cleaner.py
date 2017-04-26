@@ -1,6 +1,7 @@
 import traceback
 import os
 import logging
+import warnings
 
 from openpyxl import load_workbook
 from openpyxl.worksheet.datavalidation import DataValidation
@@ -43,10 +44,15 @@ class CleanerConfigurator:
                                                                                  project_id, cleaner_name)
             self.cleaner_id = cleaners_l[0]["id"]
 
-
-    # Platform To Excel
-
+    # platform to excel
     def get_unitcleaners(self):
+        warnings.warn("deprecated, will be removed in 3.*, use iter_unitcleaners instead", DeprecationWarning)
+        return self.client.list(
+            "opmeasures_cleaners/unitcleaners/",
+            params=dict(cleaner=self.cleaner_id)
+        )["data"]
+
+    def iter_unitcleaners(self):
         return self.client.list_iter_all(
             "opmeasures_cleaners/unitcleaners/",
             params=dict(cleaner=self.cleaner_id)
@@ -64,30 +70,35 @@ class CleanerConfigurator:
             self.get_cleaner_data()['project']
         )
 
-    def get_importerseries(self):
+    def iter_importer_series(self):
         return self.client.list_iter_all(
             "opmeasures_cleaners/importerseries",
             params=dict(cleaner=self.get_cleaner_data()['importer'])
         )
 
-    def get_not_configured_series(self):
+    def get_importerseries(self):
+        warnings.warn("deprecated, will be removed in 3.*, use iter_unitcleaners instead", DeprecationWarning)
+        return self.client.list(
+            "opmeasures_cleaners/importerseries",
+            params=dict(cleaner=self.get_cleaner_data()['importer'])
+        )["data"]
+
+    def get_non_configured_series(self):
         not_configured_series = []
-        for s in self.get_importerseries():
-            # pprint(s)
-            if (not s['unitcleaner']):
+        for s in self.iter_importer_series():
+            if not s['unitcleaner']:
                 not_configured_series.append(s)
         return not_configured_series
 
-
     def platform_to_excel(self, xlsx_generation_path):
-
-        if (xlsx_generation_path[-5:] != '.xlsx'):
-            logger.warning("The path you have chosen doesn't end up with the extension" + ' ".xlsx ." ' + 'You may encounter some issues to open it.')
+        if xlsx_generation_path[-5:] != '.xlsx':
+            logger.warning("The path you have chosen doesn't end up with the extension" + ' ".xlsx ." '
+                           + 'You may encounter some issues to open it.')
 
         project_data = self.get_project_data()
         cleaner_data= self.get_cleaner_data()
-        configured_series = list(self.get_unitcleaners()) #get_unitcleaners() returns a generator
-        not_configured_series = self.get_not_configured_series()
+        configured_series = list(self.iter_unitcleaners())
+        not_configured_series = self.get_non_configured_series()
 
         for k in ("id", "input_series", "last_clear", "last_run", "cleaner"):
             for d in configured_series:
@@ -182,7 +193,8 @@ class CleanerConfigurator:
             ws['I{}'.format(row)].value = configured_series[i]['timezone']
             ws['J{}'.format(row)].value = configured_series[i]['unit']
             ws['K{}'.format(row)].value = configured_series[i]['label']
-            ws['L{}'.format(row)].value = 'yes' if configured_series[i]['input_expected_regular'] else 'no' #Boolean could be better managed.
+            ws['L{}'.format(row)].value = 'yes' if \
+                configured_series[i]['input_expected_regular'] else 'no'  # boolean could be better managed.
             ws['M{}'.format(row)].value = configured_series[i]['unit_type']
             ws['N{}'.format(row)].value = configured_series[i]['resample_rule']
             ws['O{}'.format(row)].value = configured_series[i]['interpolate_limit']
@@ -258,10 +270,7 @@ class CleanerConfigurator:
         wb.save(xlsx_generation_path)
         print('The file "multiclean_config.xlsx" has been successfully generated at ' + xlsx_generation_path)
 
-
-
-    # Excel To Platform
-
+    # excel to platform
     def configure_unit_cleaner(self, data, update_if_exists=False):
         unitcleaners = self.client.list_iter_all(
             "opmeasures_cleaners/unitcleaners/",
