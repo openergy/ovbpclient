@@ -280,13 +280,10 @@ class CleanerConfigurator:
 
     def excel_to_platform(self, xlsx_path, update_if_exists=False):
         unitcleaners = batch_configure(xlsx_path)
-        print(len(unitcleaners))
         for uc in unitcleaners:
             try:
                 data = dict(cleaner=self.cleaner_id)
-                for k, v in uc.data.items():
-                    data[k] = v if v is not None else ''
-                print(data)
+                data.update(uc.data)
                 self.configure_unit_cleaner(data, update_if_exists=update_if_exists)
             except Exception:
                 name = getattr(uc, "external_name", "Unknown (no external name provided).")
