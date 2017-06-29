@@ -2,6 +2,15 @@
 
 Client api to interact with openergy platform
 
+## Suggested conda env
+
+<pre>
+openpyxl>=2.4.0,<2.0.0
+requests>=2.11.1,<3.0.0
+pandas>=0.16.2,<0.17
+pytables>=3.2.0,<4.0
+</pre>
+
 ## Examples
 
 <pre>
@@ -16,44 +25,38 @@ client = set_client("login", "password", "host")
 se = select_series("993e2f73-20ef-4f60-8e06-d81d6cefbc9a")
 </pre>
 
-## Suggested conda env
 
+### create local database
 <pre>
-openpyxl>=2.4.0,<2.0.0
-requests>=2.11.1,<3.0.0
-pandas>=0.16.2,<0.17
+from openergy import LocalDatabase
+
+db = LocalDatabase(db_dir_path)
+
+# download one series
+
+# (local_se is not a pandas series but a local database series object)
+local_se = db.get_local_series(
+    "my_project",
+    "analysis",  # importer, cleaner or analysis
+    "my_analysis",
+    "se1")
+local_se.download()
+
+# se1 is a pandas series
+se1 = local_se.data
+
+# download multiple series
+db.download_all_series(
+    my_project,
+    generator_model=analysis,  # importer, cleaner or analysis
+    generator_name=my_analysis)
+# 1. local se1 will be deleted and downloaded again
+# 2. all project will be downloaded if no generator has been specified
+
+# work with series
+se1 = db.get_local_series(
+    "my_project",
+    "analysis",
+    "my_analysis",
+    "se1").data
 </pre>
-
-## Releases
-
-(p): patch, (m): minor, (M): major
-
-### 2.1.0
-* m: iter_unitcleaners and iter_importer_series added
-* p: empty values of excel unitcleaners are now managed properly
-
-
-### 2.0.2
-* (m) pandas requirements were loosened
-
-### 2.0.1
-* (p): multiclean_config_model.xlsx added to MANIFEST.in
-
-### 2.0.0
-* (m): platform_to_excel added
-* (M): cleaner batch_configure renamed to excel_to_platform
-* (M): importer client kwarg removed
-* (m): requests list_iter_all added
-* (m): client management changed
-* (m): util get_series_info added
-
-### 1.0.0
-* (m): list_iter_series created
-* (M): first official release
-
-### 0.3.0
-* (m): client simplified
-* (m): get_series_info added to api
-
-### 0.2.0
-* first referenced version
