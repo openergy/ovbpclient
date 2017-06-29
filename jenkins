@@ -1,4 +1,4 @@
 package_name=openergy
 repository_host=github.com
-python_version=3.4
+python_version=3.6
 send_to_pypi=True
