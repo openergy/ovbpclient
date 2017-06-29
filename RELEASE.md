@@ -2,7 +2,8 @@
 
 (p): patch, (m): minor, (M): major
 
-## 2.2.0
+## 3.0.0
+* M: python 3.6
 * m: local db added
 
 ## 2.1.0
