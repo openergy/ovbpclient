@@ -2,6 +2,9 @@
 
 (p): patch, (m): minor, (M): major
 
+## 3.0.1
+* p: works even if os adds hidden files in directories
+
 ## 3.0.0
 * M: python 3.6
 * m: local db added

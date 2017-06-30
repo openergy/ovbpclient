@@ -66,29 +66,43 @@ class LocalDatabase:
 
         # iter generator models
         for _slug_generator_model in os.listdir(project_path):
+            # create path
+            generator_model_path = os.path.join(project_path, _slug_generator_model)
+
+            # only keep directories (osx may add hidden files automatically)
+            if not os.path.isdir(generator_model_path):
+                continue
+
             # only keep relevant
             if (slug_generator_model is not None) and (slug_generator_model != _slug_generator_model):
                 continue
 
-            # create path
-            generator_model_path = os.path.join(project_path, _slug_generator_model)
-
             # iter generator names
             for _slug_generator_name in os.listdir(generator_model_path):
+                # create path
+                generator_name_path = os.path.join(generator_model_path, _slug_generator_name)
+
+                # only keep directories (osx may add hidden files automatically)
+                if not os.path.isdir(generator_name_path):
+                    continue
+
                 # only keep relevant
                 if (slug_generator_name is not None) and (slug_generator_name != _slug_generator_name):
                     continue
 
-                # create path
-                generator_name_path = os.path.join(generator_model_path, _slug_generator_name)
-
                 # iter meta info
                 for file_name in os.listdir(generator_name_path):
+                    file_path = os.path.join(generator_name_path, file_name)
+
+                    # don't work on directories
+                    if os.path.isdir(file_path):
+                        continue
+
                     _base, extension = os.path.splitext(file_name)
                     if extension != ".json":
                         continue
 
-                    with open(os.path.join(generator_name_path, file_name)) as f:
+                    with open(file_path) as f:
                         meta = json.load(f)
 
                     yield self.get_local_series(

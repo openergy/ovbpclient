@@ -5,9 +5,10 @@ Client api to interact with openergy platform
 ## Suggested conda env
 
 <pre>
-openpyxl>=2.4.0,<2.0.0
-requests>=2.11.1,<3.0.0
-pandas>=0.16.2,<0.17
+openpyxl>=2.4.7,<3.0.0
+requests>=2.14.2,<3.0.0
+nose>=1.3.7,<2.0.0
+pandas>=0.20.1,<0.21.0
 pytables>=3.2.0,<4.0
 </pre>
 
