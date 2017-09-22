@@ -284,7 +284,7 @@ class LocalSeries:
                 native_clock=meta["native_clock"],
                 timezone=meta["timezone"],
                 tags=[],
-                default_resample_rule=meta["default_resample_rule"],
+                default_resample_rules=meta["default_resample_rule"],
                 default_max_acceptable_delay="6H",  # todo !! (must update opmodels and oplatform first)
                 storage_name=self.storage_name if human_readable_name else None
             )
