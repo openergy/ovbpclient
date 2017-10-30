@@ -23,7 +23,7 @@ class ImporterConfigurator:
     def create_importer(self, get_if_exists=True):
         assert (None not in (self.project_id, self.importer_name)), "project_id and importer_name must not be None"
         importers_l = self.client.list(
-            "opmeasures_importers/importers/",
+            "odata/importers/",
             dict(project=self.project_id, name=self.importer_name))["data"]
 
         if len(importers_l) > 1:
@@ -36,14 +36,14 @@ class ImporterConfigurator:
         else:
             # TODO: understand why create_importer with other_params fails...
             importer = self.client.create(
-                "opmeasures_importers/importers/",
+                "odata/importers/",
                 dict(project=self.project_id, name=self.importer_name)
             )
             self.importer_id = importer["id"]
 
     def update_importer(self, data):
         assert self.project_id is not None, "project_id must not be None (use create or get_or_create)"
-        self.client.partial_update("opmeasures_importers/importers", self.importer_id, data=data)
+        self.client.partial_update("odata/importers", self.importer_id, data=data)
 
     # def configure_from_directory(self, dir_path):
     #     """

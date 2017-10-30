@@ -37,7 +37,7 @@ class CleanerConfigurator:
         else:
             project_id, cleaner_name = cleaner_uid
             cleaners_l = self.client.list(
-                "opmeasures_cleaners/cleaners/",
+                "odata/cleaners/",
                 params=dict(project=project_id, name=cleaner_name))["data"]
             assert len(cleaners_l) == 1, "One and only one cleaner should exist, found %s. " \
                                          "(project id: %s, cleaner_name: %s)" % (len(cleaners_l),
@@ -48,38 +48,38 @@ class CleanerConfigurator:
     def get_unitcleaners(self):
         warnings.warn("deprecated, will be removed in 3.*, use iter_unitcleaners instead", DeprecationWarning)
         return self.client.list(
-            "opmeasures_cleaners/unitcleaners/",
+            "odata/unitcleaners/",
             params=dict(cleaner=self.cleaner_id)
         )["data"]
 
     def iter_unitcleaners(self):
         return self.client.list_iter_all(
-            "opmeasures_cleaners/unitcleaners/",
+            "odata/unitcleaners/",
             params=dict(cleaner=self.cleaner_id)
         )
 
     def get_cleaner_data(self):
         return self.client.retrieve(
-            "opmeasures_cleaners/cleaners/",
+            "odata/cleaners/",
             self.cleaner_id
         )
 
     def get_project_data(self):
         return self.client.retrieve(
-            "opmeasures/projects/",
+            "odata/projects/",
             self.get_cleaner_data()['project']
         )
 
     def iter_importer_series(self):
         return self.client.list_iter_all(
-            "opmeasures_cleaners/importerseries",
+            "odata/importer_series",
             params=dict(cleaner=self.get_cleaner_data()['importer'])
         )
 
     def get_importerseries(self):
         warnings.warn("deprecated, will be removed in 3.*, use iter_unitcleaners instead", DeprecationWarning)
         return self.client.list(
-            "opmeasures_cleaners/importerseries",
+            "odata/importer_series",
             params=dict(cleaner=self.get_cleaner_data()['importer'])
         )["data"]
 
@@ -273,7 +273,7 @@ class CleanerConfigurator:
     # excel to platform
     def configure_unit_cleaner(self, data, update_if_exists=False):
         unitcleaners = self.client.list_iter_all(
-            "opmeasures_cleaners/unitcleaners/",
+            "odata/unitcleaners/",
             params=dict(cleaner=self.cleaner_id, external_name=data["external_name"])
         )
         unitcleaner_l = list(unitcleaners)
@@ -281,10 +281,13 @@ class CleanerConfigurator:
             if not update_if_exists:
                 raise AssertionError("unitcleaner already exists, can't create (use update_if_exists=True)")
             # we delete
-            self.client.destroy("opmeasures_cleaners/unitcleaners/", unitcleaner_l[0]["id"])
+            self.client.destroy("odata/unitcleaners/", unitcleaner_l[0]["id"])
+
+        # add cleaner argument to data (will replace if already there)
+        data["cleaner"] = self.cleaner_id
 
         # we create
-        self.client.create("opmeasures_cleaners/unitcleaners/", data)
+        self.client.create("odata/unitcleaners/", data)
         print(data['name'] + ' has been successfully configured')
 
     def excel_to_platform(self, xlsx_path, update_if_exists=False):

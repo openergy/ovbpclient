@@ -9,11 +9,11 @@ class Client(RESTClient):
             host,
             port,
             credentials=(login, password),
-            root_endpoint="api/v1"
+            root_endpoint="api/v2"
         )
 
     def _check_is_on_request(self):
-        return self.list("opmeasures/projects")
+        return self.list("oteams/projects")
 
 
 def set_client(login, password, host, port=443):

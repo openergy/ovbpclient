@@ -136,7 +136,7 @@ class LocalDatabase:
 
         # iter all series meta
         for series_meta in client.list_iter_all(
-                "opmeasures/series",
+                "odata/series",
                 params=params
         ):
             # extract info
@@ -327,7 +327,7 @@ class LocalSeries:
         self.set_meta(**dict([(k, info[k]) for k in META_FIELDS]))
 
         # select data
-        rep = client.detail_route("opmeasures/series", info["id"], "GET", "select", return_json=False)
+        rep = client.detail_route("odata/series", info["id"], "GET", "select", return_json=False)
 
         # transform to pandas series
         se = pd.read_json(rep, orient="split", typ="series")

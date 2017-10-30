@@ -12,6 +12,12 @@ pandas>=0.20.1,<0.21.0
 pytables>=3.2.0,<4.0
 </pre>
 
+## Url endpoints philosophy
+
+Mainly inspired by [rest_framework simple router actions](http://www.django-rest-framework.org/api-guide/routers/#simplerouter). 
+
+
+
 ## Examples
 
 <pre>

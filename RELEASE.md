@@ -2,6 +2,9 @@
 
 (p): patch, (m): minor, (M): major
 
+## 3.1.0
+* m: oplatform v2 interface implemented
+
 ## 3.0.1
 * p: works even if os adds hidden files in directories
 

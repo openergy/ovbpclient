@@ -19,7 +19,7 @@ def get_series_info(uuid, detailed=True):
     if isinstance(uuid, (tuple, list)):
         project_name, generator_model, generator_name, name = uuid
         all_series = client.list(
-            "opmeasures/series",
+            "odata/series",
             params=dict(
                 project_name=project_name,
                 generator_model=generator_model,
@@ -37,13 +37,13 @@ def get_series_info(uuid, detailed=True):
 
     # detailed route
     if detailed:
-        detailed_info = client.retrieve("opmeasures/series", series_id)
+        detailed_info = client.retrieve("odata/series", series_id)
         return detailed_info
 
     # not detailed
     if flat_info is None:
         all_series = client.list(
-            "opmeasures/series",
+            "odata/series",
             params=dict(
                 id=uuid
             ))
@@ -66,7 +66,7 @@ def select_series(uuid, **select_kwargs):
     series_id, name = info["id"], info["name"]
 
     # select data
-    rep = client.detail_route("opmeasures/series", series_id, "GET", "select", params=select_kwargs, return_json=False)
+    rep = client.detail_route("odata/series", series_id, "GET", "select", params=select_kwargs, return_json=False)
 
     # transform to pandas series
     se = pd.read_json(rep, orient="split", typ="series")
