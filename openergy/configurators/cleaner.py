@@ -45,13 +45,6 @@ class CleanerConfigurator:
             self.cleaner_id = cleaners_l[0]["id"]
 
     # platform to excel
-    def get_unitcleaners(self):
-        warnings.warn("deprecated, will be removed in 3.*, use iter_unitcleaners instead", DeprecationWarning)
-        return self.client.list(
-            "odata/unitcleaners/",
-            params=dict(cleaner=self.cleaner_id)
-        )["data"]
-
     def iter_unitcleaners(self):
         return self.client.list_iter_all(
             "odata/unitcleaners/",
@@ -73,15 +66,8 @@ class CleanerConfigurator:
     def iter_importer_series(self):
         return self.client.list_iter_all(
             "odata/importer_series",
-            params=dict(cleaner=self.get_cleaner_data()['importer'])
+            params=dict(importer=self.get_cleaner_data()['related_importer'])
         )
-
-    def get_importerseries(self):
-        warnings.warn("deprecated, will be removed in 3.*, use iter_unitcleaners instead", DeprecationWarning)
-        return self.client.list(
-            "odata/importer_series",
-            params=dict(cleaner=self.get_cleaner_data()['importer'])
-        )["data"]
 
     def get_non_configured_series(self):
         not_configured_series = []

@@ -2,6 +2,10 @@
 
 (p): patch, (m): minor, (M): major
 
+## 3.1.1
+* p: cleaner: iter_importer_series debug
+* p: deprecated methods removed
+
 ## 3.1.0
 * m: oplatform v2 interface implemented
 
