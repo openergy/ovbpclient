@@ -66,13 +66,13 @@ class CleanerConfigurator:
     def iter_importer_series(self):
         return self.client.list_iter_all(
             "odata/importer_series",
-            params=dict(importer=self.get_cleaner_data()['related_importer'])
+            params=dict(generator=self.get_cleaner_data()['related_importer'])
         )
 
     def get_non_configured_series(self):
         not_configured_series = []
         for s in self.iter_importer_series():
-            if not s['unitcleaner']:
+            if s['unitcleaner'] is None:
                 not_configured_series.append(s)
         return not_configured_series
 
@@ -82,7 +82,7 @@ class CleanerConfigurator:
                            + 'You may encounter some issues to open it.')
 
         project_data = self.get_project_data()
-        cleaner_data= self.get_cleaner_data()
+        cleaner_data = self.get_cleaner_data()
         configured_series = list(self.iter_unitcleaners())
         not_configured_series = self.get_non_configured_series()
 
@@ -90,11 +90,11 @@ class CleanerConfigurator:
             for d in configured_series:
                 d.pop(k, None)
 
-        n_cs = len(configured_series)
-        n_ncs = len(not_configured_series)
-        n_tot = n_cs + n_ncs
+        configured_nb = len(configured_series)
+        non_configured_nb = len(not_configured_series)
+        tot_nb = configured_nb + non_configured_nb
         start_row = 8
-        last_row = n_tot + start_row - 1
+        last_row = tot_nb + start_row - 1
         start_col = 1
         last_col = 23
 
@@ -166,7 +166,7 @@ class CleanerConfigurator:
         # ***************
 
         # Adding configured series and their parameters
-        for i in range(0, n_cs):
+        for i in range(configured_nb):
             row = i + start_row
             ws['A{}'.format(row)].value = configured_series[i]['external_name']
             ws['B{}'.format(row)].value = configured_series[i]['name']
@@ -194,8 +194,8 @@ class CleanerConfigurator:
             ws['W{}'.format(row)].value = configured_series[i]['custom_after_offset']
 
         # Adding non-configured series external names
-        for i in range(0, n_ncs):
-            row = i + start_row + n_cs
+        for i in range(non_configured_nb):
+            row = i + start_row + configured_nb
             ws['A{}'.format(row)].value = not_configured_series[i]['external_name']
 
         # *********

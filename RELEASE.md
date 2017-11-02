@@ -2,6 +2,9 @@
 
 (p): patch, (m): minor, (M): major
 
+## 3.1.2
+* p: cleaner configurator debug
+
 ## 3.1.1
 * p: cleaner: iter_importer_series debug
 * p: deprecated methods removed
