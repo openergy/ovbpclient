@@ -24,7 +24,7 @@ META_FIELDS = (  # except name
         "freq",
         "native_clock",
         "timezone",
-        "default_resample_rule",
+        "default_resample_rules",
     )
 
 
@@ -246,7 +246,7 @@ class LocalSeries:
             freq,
             native_clock="tzt",
             timezone=None,
-            default_resample_rule="mean"):
+            default_resample_rules="mean"):
         assert not os.path.exists(self.meta_path), "can't use set meta if meta already exists. use update_meta"
         self.prepare_directory_tree()
         with open(self.meta_path, "w") as f:
@@ -255,7 +255,7 @@ class LocalSeries:
                 freq=freq,
                 native_clock=native_clock,
                 timezone=timezone,
-                default_resample_rule=default_resample_rule
+                default_resample_rules=default_resample_rules
             ), f, indent=4)
 
     def update_meta(self, **kwargs):
@@ -271,7 +271,7 @@ class LocalSeries:
             meta["freq"],
             native_clock=meta["native_clock"],
             timezone=meta["timezone"],
-            default_resample_rule=meta["default_resample_rule"]
+            default_resample_rules=meta["default_resample_rules"]
         )
 
     def get_se_io(self, human_readable_name=True):
@@ -284,7 +284,7 @@ class LocalSeries:
                 native_clock=meta["native_clock"],
                 timezone=meta["timezone"],
                 tags=[],
-                default_resample_rule=meta["default_resample_rule"],
+                default_resample_rules=meta["default_resample_rules"],
                 default_max_acceptable_delay="6H",  # todo !! (must update opmodels and oplatform first)
                 storage_name=self.storage_name if human_readable_name else None
             )
