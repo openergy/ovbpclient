@@ -179,8 +179,8 @@ class CleanerConfigurator:
             ws['I{}'.format(row)].value = configured_series[i]['timezone']
             ws['J{}'.format(row)].value = configured_series[i]['unit']
             ws['K{}'.format(row)].value = configured_series[i]['label']
-            ws['L{}'.format(row)].value = 'yes' if \
-                configured_series[i]['input_expected_regular'] else 'no'  # boolean could be better managed.
+            ws['L{}'.format(row)].value = 'yes' if configured_series[i]['input_expected_regular'] else 'no'
+            # boolean could be better managed.
             ws['M{}'.format(row)].value = configured_series[i]['unit_type']
             ws['N{}'.format(row)].value = configured_series[i]['resample_rule']
             ws['O{}'.format(row)].value = configured_series[i]['interpolate_limit']
