@@ -9,6 +9,7 @@ import pandas as pd
 from slugify import slugify
 
 from .outil import mkdir
+from .outil.async import SyncWrapper
 
 from openergy import get_client, get_series_info
 
@@ -207,12 +208,12 @@ class LocalSeries:
             slugify(self.generator_name),
             slugify(self.name)
         )
-
-    @property
-    def storage_name(self):
-        # we use hash for unique match with name (prefix with se to comply with python variables naming, in case hash
-        # starts with number
-        return "se" + hashlib.sha1(self.base_path.encode("utf-8")).hexdigest()
+    #
+    # @property
+    # def storage_name(self):
+    #     # we use hash for unique match with name (prefix with se to comply with python variables naming, in case hash
+    #     # starts with number
+    #     return "se" + hashlib.sha1(self.base_path.encode("utf-8")).hexdigest()
 
     @property
     def data(self):
@@ -274,11 +275,11 @@ class LocalSeries:
             default_resample_rules=meta["default_resample_rules"]
         )
 
-    def get_se_io(self, human_readable_name=True):
+    def get_se_io(self):
         if SingleKeyHDFSeriesIO is not None:  # use otimeframes series_io
             meta = self.get_meta()
             return SingleKeyHDFSeriesIO(
-                self.name if human_readable_name else self.storage_name,
+                self.name,
                 self.data_path,
                 freq=meta["freq"],
                 native_clock=meta["native_clock"],
@@ -286,14 +287,16 @@ class LocalSeries:
                 tags=[],
                 default_resample_rules=meta["default_resample_rules"],
                 default_max_acceptable_delay="6H",  # todo !! (must update opmodels and oplatform first)
-                storage_name=self.storage_name if human_readable_name else None
             )
 
         # use incomplete local series io
         return IncompleteLocalSeriesIO(
-            self.name if human_readable_name else self.storage_name,
+            self.name,
             self.data_path
         )
+
+    def get_sync_se_io(self):
+        return SyncWrapper(self.get_se_io())
 
     def download(self):
         """
@@ -331,13 +334,13 @@ class LocalSeries:
 
         # transform to pandas series
         se = pd.read_json(rep, orient="split", typ="series")
-
-        # put storage name
-        se.name = self.storage_name
+        #
+        # # put storage name
+        # se.name = self.storage_name
 
         # write data
-        se_io = self.get_se_io(human_readable_name=False)
-        se_io.append(se)
+        sync_se_io = SyncWrapper(self.get_se_io())
+        sync_se_io.append(se)
 
     def __str__(self):
         if os.path.exists(self.meta_path):

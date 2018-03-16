@@ -2,6 +2,9 @@
 
 (p): patch, (m): minor, (M): major
 
+## 3.1.4
+* p: compatibility with async series io
+
 ## 3.1.3
 * p: default_resample_rule changed to default_resample_rules
 
