@@ -6,7 +6,7 @@ with open(os.path.join("openergy", "version.py")) as f:
     version = f.read().split("=")[1].strip().strip("'").strip('"')
 
 with open("requirements.txt", "r") as f:
-    requirements = [str(r) for r in parse_requirements(f.read())]
+    requirements = [str(r).replace("pytables", "tables") for r in parse_requirements(f.read())]
 
 setup(
     name='openergy',
