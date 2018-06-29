@@ -2,6 +2,8 @@
 
 (p): patch, (m): minor, (M): major
 
+## next
+
 ## 3.1.5
 * p: updated requirements and changed CI configuration
 
