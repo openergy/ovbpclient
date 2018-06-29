@@ -2,6 +2,9 @@
 
 (p): patch, (m): minor, (M): major
 
+## 3.1.5
+* p: updated requirements and changed CI configuration
+
 ## 3.1.4
 * p: compatibility with async series io
 
