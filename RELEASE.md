@@ -2,6 +2,8 @@
 
 (p): patch, (m): minor, (M): major
 
+## next
+
 ## 3.1.6
 * p: pip pytables/tables bug fix
 
