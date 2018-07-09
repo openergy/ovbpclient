@@ -1,116 +1,22 @@
 import pandas as pd
 
-def get_single_series(
-        client,
-        project,
-        generator_name,
-        generator_model,
-        series_name
-):
-    """
-    Parameters
-    ----------
-
-    client: RESTClient
-        See openergy.set_client()
-
-    project: dictionary
-        Project record
-
-    series_name: string
-        The name of the series
-
-    generator_name: string
-        The name of the generator of the series
-
-    generator_model: string
-        "importer", "cleaner", "analysis"
-
-    Returns
-    -------
-
-    The series record as a dictionary
-
-    """
-
-    series_record = client.list(
-        "odata/series",
-        params={
-            "project": project["odata"],
-            "name": series_name,
-            "generator_name" : generator_name ,
-            "generator_model": generator_model
-        }
-    )["data"]
-
-    if len(series_record) ==0:
-        print(f"Impossible to find the series {series_name} from {generator_model} {generator_name}")
-    elif len(series_record) ==1:
-        return series_record[0]
-    else:
-        print("Several series named {series_name} found, that's strange...")
-
-    return
-
-
-def get_series_of_generator(
-        client,
-        project,
-        generator_name,
-        generator_model
-):
-    """
-    Parameters
-    ----------
-
-    client: RESTClient
-        See openergy.set_client()
-
-    project: dictionary
-        Project record
-
-    generator_name: string
-        The name of the generator of the series
-
-    generator_model: string
-        "importer", "cleaner", "analysis"
-
-    Returns
-    -------
-
-    The list of series records from the generator
-
-    """
-
-    return client.list(
-        "odata/series",
-        params={
-            "project": project["odata"],
-            "generator_name": generator_name,
-            "generator_model": generator_model
-        }
-    )["data"]
+from openergy import get_client
 
 
 def get_series_data(
-        client,
-        series_list,
-        return_df=True,
-        start=None,
-        end=None,
-        resample=None,
-        dropna=None,
-        closed=None
+    series_list,
+    return_df=True,
+    start=None,
+    end=None,
+    resample=None,
+    dropna=None,
+    closed=None
 ):
     """
     Parameters
     ----------
 
-    client: RESTClient
-        See openergy.set_client()
-
-    series: dictionary
-        Series record
+    series_list: list of Series instances
 
     start: string
         Date iso format
@@ -123,6 +29,9 @@ def get_series_data(
     closed: string
         "left", "right", "both"
 
+    resample: string
+
+
     Returns
     -------
 
@@ -130,7 +39,9 @@ def get_series_data(
 
     """
 
-    series_pk_list = [se["otsdb_pk"] for se in series_list]
+    client = get_client()
+
+    series_pk_list = [se.otsdb_pk for se in series_list]
 
     params = {}
     if start is not None:
@@ -141,6 +52,8 @@ def get_series_data(
         params["resample"] = resample
     if closed is not None:
         params["closed"] = closed
+    if dropna:
+        params["dropna"] = True
 
     series_data = client.list_route(
         "odata/series",
@@ -160,3 +73,72 @@ def get_series_data(
         df = pd.DataFrame(df_data)
         df.index = pd.to_datetime(df.index, unit='ms')
         return df
+
+
+class Series:
+
+    def __init__(self, info):
+
+        if ("id" in info.keys()) and ("name" in info.keys()):
+            self._info = info
+            self.__dict__.update(info)
+        else:
+            raise ValueError("The info must contain at least 'id' and 'name' field")
+
+    @classmethod
+    def retrieve(
+            cls,
+            project_name=None,
+            generator_name=None,
+            generator_model=None,
+            name=None,
+            id=None
+    ):
+        client = get_client()
+        if id is None:
+            if (name is None) or (project_name is None)\
+                    or (generator_name is None) or (generator_model) is None:
+                raise ValueError("Please indicate at least an id or a project name, a generator name, a generator model"
+                                 " and a name so that the series can be retrieved")
+            else:
+                r = client.list(
+                    "odata/series",
+                    params={
+                        "name": name,
+                        "project_name": project_name,
+                        "generator_name": generator_name,
+                        "generator_model": generator_model
+                    }
+                )["data"]
+
+                if len(r) == 0:
+                    return
+                elif len(r) == 1:
+                    id = r[0]["id"]
+
+        info = client.retrieve(
+            "odata/series",
+            id
+        )
+
+        return cls(info)
+
+    def get_data(
+        self,
+        return_df=True,
+        start=None,
+        end=None,
+        resample=None,
+        dropna=None,
+        closed=None
+    ):
+
+        return get_series_data(
+            [self],
+            return_df,
+            start,
+            end,
+            resample,
+            dropna,
+            closed
+        )

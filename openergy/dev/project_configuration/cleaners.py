@@ -1,89 +1,174 @@
-from .resources_general import get_resource_from_name, activate_resource, waiting_for_outputs
+from openergy import get_client
+from . import Generator, ActivationMixin
 
-def configure_cleaner(
-        client,
-        project,
-        cleaner_name,
-        unitcleaner_config_fct,
-        activate=True,
-        replace=False,
-        wait_for_outputs=False
-):
-    """
-    Parameters
-    ----------
 
-    client: RESTClient
-        See openergy.set_client()
+class Cleaner(Generator):
 
-    project: dictionary
-        Project record
+    def __init__(self, info):
+        super().__init__(info)
+        self.model = "cleaner"
 
-    cleaner_name: string
-        The name of the cleaner
-
-    unitcleaner_config_fct: fct
-        This function takes one input series resource as argument.
-        You have to code this function so that it returns the configuration depending on each series
-
-    activate: boolean, default True
-        True -> The unticleaners get activated after creation
-
-    replace: boolean, default False
-        True -> If a unitcleaner with the same name already exists, it gets deleted and a new one get created
-        False ->  If a unitcleaner with the same name already exists, a message informs you and nothing get created
-
-    wait_for_outputs: boolean, default False
-        True -> Wait for the outputs to be created. (With activate=True only)
-
-    Returns
-    -------
-
-    The configured cleaner record as a dictionary
-    """
-
-    cleaner = get_resource_from_name(client, project, cleaner_name, "cleaner")
-
-    if cleaner is None:
+    def activate(self):
         return
 
-    # retrieve unitcleaners
-    importer_series = client.list(
-        "/odata/importer_series/",
-        params={"generator": cleaner["related_importer"]}
-    )["data"]
+    def deactivate(self):
+        return
 
-    # configure unitcleaners
-    for se in importer_series:
+    def delete(self):
+        print("Impossible to delete a cleaner")
 
-        if se["unitcleaner"] is not None and replace:
-            client.destroy(
+    def configure_all(
+            self,
+            unitcleaner_config_fct,
+            activate=True,
+            replace=False
+    ):
+        """
+        Parameters
+        ----------
+
+        unitcleaner_config_fct: fct
+            This function takes one input series resource as argument.
+            You have to code this function so that it returns the configuration depending on each series
+
+        activate: boolean, default True
+            True -> The unticleaners get activated after creation
+
+        replace: boolean, default False
+            True -> If a unitcleaner with the same name already exists, it gets deleted and a new one get created
+            False ->  If a unitcleaner with the same name already exists, a message informs you and nothing get created
+
+        Returns
+        -------
+
+        The configured cleaner record as a dictionary
+        """
+
+        client = get_client()
+
+        # retrieve unitcleaners
+        importer_series = client.list(
+            "/odata/importer_series/",
+            params={"generator": self.related_importer}
+        )["data"]
+
+        # configure unitcleaners
+        for se in importer_series:
+
+            if se["unitcleaner"] is not None and replace:
+                client.destroy(
+                    "/odata/unitcleaners/",
+                    se["unitcleaner"]
+                )
+            elif se["unitcleaner"] is not None and not replace:
+                print(f"Unitcleaner for series {se['external_name']} already exists")
+                continue
+
+            unitcleaner_config = unitcleaner_config_fct(se)
+            unitcleaner_config["cleaner"] = self.id
+
+            uc_info = client.create(
                 "/odata/unitcleaners/",
-                se["unitcleaner"]
+                data=unitcleaner_config
             )
-        elif se["unitcleaner"] is not None and not replace:
-            print(f"Unitcleaner for series {se['external_name']} already exists")
 
-        unitcleaner_config = unitcleaner_config_fct(se)
-        unitcleaner_config["cleaner"] = cleaner["id"]
+            print(f'{se["external_name"]} configured.')
 
-        uc = client.create(
-            "/odata/unitcleaners/",
-            data=unitcleaner_config
-        )
+            if activate:
+                uc = Unitcleaner(uc_info)
+                uc.activate()
+                print(f'{se["external_name"]} activated.')
 
-        print(f'{se["external_name"]} configured.')
+        return self.get_detailed_info()
 
-        if activate:
-            activate_resource(client, uc, "unitcleaner")
+    def get_importer_series_from_external_name(
+            self,
+            external_name
+    ):
 
-    if wait_for_outputs:
-        waiting_for_outputs(client, cleaner, "cleaner", len(importer_series))
+        client = get_client()
 
-    return cleaner
+        importer_series = client.list(
+            "/odata/importer_series/",
+            params={
+                "generator": self.related_importer,
+                "external_name": external_name
+            }
+        )["data"]
+
+        if len(importer_series) == 0:
+            print(f"No input series named {external_name} found in the cleaner {self.name}")
+            return
+        elif len(importer_series) == 1:
+            return importer_series[0]
+
+    def configure_one(
+            self,
+            external_name,
+            name,
+            freq,
+            input_unit_type,
+            unit_type,
+            input_convention,
+            clock,
+            timezone,
+            unit=None,
+            resample_rule=None,
+            interpolate_limit=None,
+            activate=True
+    ):
+
+        client = get_client()
+
+        importer_series = self.get_importer_series_from_external_name(external_name)
+
+        if importer_series is not None:
+
+            data = {
+                "cleaner": self.id,
+                "external_name": external_name,
+                "name": name,
+                "freq": freq,
+                "input_unit_type": input_unit_type,
+                "unit_type": unit_type,
+                "input_convention": input_convention,
+                "clock": clock,
+                "timezone": timezone,
+            }
+
+            if unit is not None:
+                data["unit"] = unit
+            if resample_rule is not None:
+                data["resample_rule"] = resample_rule
+            if interpolate_limit is not None:
+                data["interpolate_limit"] = interpolate_limit
+
+            uc_info = client.create(
+                "/odata/unitcleaners/",
+                data=data
+            )
+
+            print(f'Unitcleaner {external_name} configured.')
+
+            if activate:
+                uc = Unitcleaner(uc_info)
+                uc.activate()
+                print(f'Unitcleaner {external_name} activated.')
+
+            return uc_info
+
+
+class Unitcleaner(ActivationMixin):
+
+    def __init__(self, info):
+        self._info = info
+        self.__dict__.update(info)
+
+        self.activable_object_model = "unitcleaner"
+        self.activable_object_id = self.id
+
 
 def get_unitcleaner_config(
-        cleaner,
         external_name,
         name,
         freq,
@@ -92,12 +177,13 @@ def get_unitcleaner_config(
         input_convention,
         clock,
         timezone,
+        wait_offset="6H",
         unit=None,
         resample_rule=None,
         interpolate_limit=None,
+        custom_delay=None
 ):
     data = {
-        "cleaner": cleaner["id"],
         "external_name": external_name,
         "name": name,
         "freq": freq,
@@ -106,6 +192,8 @@ def get_unitcleaner_config(
         "input_convention": input_convention,
         "clock": clock,
         "timezone": timezone,
+        "wait_offset": wait_offset,
+        "custom_delay": custom_delay
     }
 
     if unit is not None:
@@ -116,84 +204,3 @@ def get_unitcleaner_config(
         data["interpolate_limit"] = interpolate_limit
 
     return data
-
-
-def get_importer_series_from_external_name(
-        client,
-        cleaner,
-        external_name
-):
-
-    importer_series = client.list(
-        "/odata/importer_series/",
-        params={
-            "generator": cleaner["related_importer"],
-            "external_name": external_name
-        }
-    )["data"]
-
-    if len(importer_series) == 0:
-        print(f"No input series named {external_name} found for the cleaner {cleaner['name']}")
-    elif len(importer_series) == 1:
-        return importer_series[0]
-    else:
-        print(f"Several input series named {external_name} found for the cleaner {cleaner['name']}")
-
-    return
-
-
-def create_unitcleaner(
-        client,
-        cleaner,
-        external_name,
-        name,
-        freq,
-        input_unit_type,
-        unit_type,
-        input_convention,
-        clock,
-        timezone,
-        unit=None,
-        resample_rule=None,
-        interpolate_limit=None,
-        activate=True
-):
-
-    importer_series = get_importer_series_from_external_name(
-        client,
-        cleaner,
-        external_name
-    )
-
-    if importer_series is not None:
-
-        data = {
-            "cleaner": cleaner["id"],
-            "external_name": external_name,
-            "name": name,
-            "freq": freq,
-            "input_unit_type": input_unit_type,
-            "unit_type": unit_type,
-            "input_convention": input_convention,
-            "clock": clock,
-            "timezone": timezone,
-        }
-
-        if unit is not None:
-            data["unit"] = unit
-        if resample_rule is not None:
-            data["resample_rule"] = resample_rule
-        if interpolate_limit is not None:
-            data["interpolate_limit"] = interpolate_limit
-
-        uc = client.create(
-            "/odata/unitcleaners/",
-            data=data
-        )
-
-        print(f'Unitcleaner {external_name} configured.')
-
-        if activate:
-            activate_resource(client, uc, "unitcleaner")
-
-        return uc

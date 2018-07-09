@@ -1,8 +1,27 @@
 import pprint
 
 import pandas as pd
+from uuid import UUID
 
 from openergy import get_client
+
+
+def is_uuid(uuid):
+    if isinstance(uuid, str):
+        try:
+            uid = UUID(uuid)
+            return uid.hex == uuid.replace('-', '')
+        except ValueError:
+            return False
+
+    return False
+
+
+def get_odata_url(record):
+    if record == "analysis":
+        return "odata/analyses"
+    else:
+        return f"odata/{record}s"
 
 
 def get_series_info(uuid, detailed=True):

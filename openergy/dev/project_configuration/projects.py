@@ -1,132 +1,536 @@
-def get_project(
-        client,
-        project_id
-):
-    return client.retrieve(
-        "oteams/projects",
-        project_id
-    )
+from openergy import get_client, get_odata_url
+
+from . import Organization
 
 
-def get_project_from_name(
-        client,
-        organization,
-        project_name
-):
-    """
-    Get a single project record, knowing only its name and organization
+class Project:
 
-    Parameters
-    ----------
+    @classmethod
+    def retrieve(cls, organization_name=None, name=None, id=None, odata=None):
+        client = get_client()
+        if id is None:
+            if odata is None:
+                if (organization_name is None) or (name is None):
+                    raise ValueError("Please indicate at least an id or an organization name and a project name "
+                                     "so that the project can be retrieved")
+                else:
 
-    client: RESTClient
-        See openergy.set_client()
+                    r = client.list(
+                        "/oteams/projects/",
+                        params={
+                            "name": name,
+                            "organization": Organization.retrieve(organization_name).id
+                        }
+                    )["data"]
 
-    organization: dictionary
-        Organization record
+                    if len(r) == 0:
+                        return
+                    elif len(r) == 1:
+                        id = r[0]["id"]
+            else:
+                r = client.list(
+                    "/oteams/projects/",
+                    params={
+                        "odata": odata
+                    }
+                )["data"]
 
-    project_name: string
-        The name of the project
+            if len(r) == 0:
+                return
+            elif len(r) == 1:
+                id = r[0]["id"]
 
-    Returns
-    -------
+        info = client.retrieve(
+            "oteams/projects",
+            id
+        )
 
-    The project record as a dictionary
+        return cls(info)
 
-    """
 
-    project = client.list(
-        "/oteams/projects/",
-        params={
-            "organization": organization["id"],
-            "name": project_name
+    def __init__(self, info):
+
+        if ("id" in info.keys()) and ("name" in info.keys()):
+            self._info = info
+            self.__dict__.update(info)
+        else:
+            raise ValueError("The info must contain at least 'id' and 'name' field")
+
+    def get_detailed_info(self):
+
+        client = get_client()
+
+        info = client.retrieve(
+            "oteams/projects",
+            self.id
+        )
+
+        self._info = info
+        self.__dict__.update(info)
+
+        return self._info
+
+    def get_organization(self):
+        return Organization.retrieve(self.organization["id"])
+
+    def delete(self):
+
+        client = get_client()
+
+        name = self.name
+
+        client.destroy(
+            "oteams/projects",
+            self.id
+        )
+
+        for k in self._info.keys():
+            setattr(self, k, None)
+
+        self._info = None
+
+        print(f"The project {name} has been successfully deleted")
+
+    def _get_resource_classes(self, generators_only=False):
+
+        # Touchy imports
+        from . import Gate, Importer, Cleaner, Analysis
+
+        classes = {
+            "importer": Importer,
+            "cleaner": Cleaner,
+            "analysis": Analysis
         }
-    )["data"]
+        if not generators_only:
+            classes["gate"] = Gate
 
-    if len(project) == 0:
-        print(f"No project named {project_name} in this organization")
-        return
-    elif len(project) == 1:
-        return project[0]
-    else:
-        print(f"Several results found... Houston, we got a problem!")
-        return
+        return classes
+
+    def get_all_resources(self, generators_only=False):
+
+        client = get_client()
+
+        resource_classes = self._get_resource_classes(generators_only)
+
+        resources = []
+
+        for resource_model, resource_class  in resource_classes.items():
+            r = client.list(
+                get_odata_url(resource_model),
+                params={
+                    "project": self.odata
+                }
+            )["data"]
+
+            resources += [resource_class(info) for info in r]
+
+        return resources
+
+    def get_resource(self, model, name):
+
+        resource_classes = self._get_resource_classes()
+
+        client = get_client()
+        r = client.list(
+            get_odata_url(model),
+            params={
+                "name": name,
+                "project": self.odata
+            }
+        )["data"]
+
+        if len(r) == 0:
+            return None
+        else:
+            return resource_classes[model](r[0])
+
+    def create_internal_gate(
+        self,
+        name,
+        timezone,
+        crontab,
+        script,
+        comment="",
+        replace=False,
+        activate=True,
+        passive=False
+    ):
+
+        # Touchy imports
+        from . import Gate
+
+        client = get_client()
+
+        #verify if it exists already
+        g = self.get_resource("gate", name)
+        if g is not None:
+            print(f"Gate {name} already existed")
+            if not replace:
+                return
+            else:
+                print(f"Deleting current gate {name}")
+                g.delete()
+
+        print(f"Creation of new gate {name}")
+
+        gate_info = client.create(
+            get_odata_url("gate"),
+            data={
+                "project": self.odata,
+                "name": name,
+                "comment": comment
+            }
+        )
+
+        print(f"The gate {name} has been successfully created")
+
+        gate = Gate(gate_info)
+
+        gate.create_oftp_account()
+
+        if not passive:
+
+            base_feeder = gate.create_base_feeder(timezone, crontab)
+
+            base_feeder.create_generic_basic_feeder(script)
+
+            if activate:
+                base_feeder.activate()
+                print(f"The gate {name} has been successfully activated")
+
+        return gate
+
+    def create_external_gate(
+            self,
+            name,
+            host,
+            port,
+            protocol,
+            login,
+            password,
+            comment="",
+            replace=False
+    ):
+
+        from . import Gate
+
+        client = get_client()
+
+        # verify if it exists already
+        g = self.get_resource("gate", name)
+        if g is not None:
+            print(f"Gate {name} already existed")
+            if not replace:
+                return
+            else:
+                print(f"Deleting current gate {name}")
+                g.delete()
+
+        print(f"Creation of new gate {name}")
+
+        gate_info = client.create(
+            get_odata_url("gate"),
+            data={
+                "project": self.odata,
+                "name": name,
+                "comment": comment
+            }
+        )
+
+        gate = Gate(gate_info)
+
+        gate.update_external_ftp(
+            host,
+            port,
+            protocol,
+            login,
+            password,
+        )
+
+        print(f"The gate {name} has been successfully created")
+
+        return gate
+
+    def create_importer(
+            self,
+            name,
+            gate_name,
+            parse_script,
+            root_dir_path="/",
+            crontab="",
+            re_run_last_file=False,
+            comment="",
+            activate=True,
+            replace=False,
+            waiting_for_outputs=False,
+            outputs_length=0,
+            sleep_loop_time=15,
+            abort_time=180
+    ):
+        """
+        Parameters
+        ----------
+
+        importer_name: string
+            The name of the importer
+
+        gate_name: string
+            The name of the gate to read files in
+
+        parse_script: string
+            The full python script to parse the files
+
+        root_dir_path: string
+            The path the importer starts to read files
+
+        crontab: string
+            6 characters to set the execution frequency of the importer
+            (see https://platform.openergy.fr/docs/glossaire.html?highlight=crontab#crontab)
+
+        re_run_last_file: boolean, default False
+            Decides if the last file should be re-read by the importer at the beginning of each execution
+
+        importer_comment: string, defaut ""
+            An optional comment for the importer
+
+        activate: boolean, default True
+            True -> The importer get activated after creation
+
+        replace: boolean, default False
+            True -> If an importer with the same name already exists, it gets deleted and a new one get created
+            False ->  If an importer with the same name already exists, a message informs you and nothing get created
+
+        wait_for_outputs: boolean, default False
+            True -> Wait for the outputs to be created. (With activate=True only)
+
+        outputs_length: int
+            The number of expected outputs.
+
+        Returns
+        -------
+
+        The created importer instance
+        """
+
+        # Touchy import
+        from . import Importer
+
+        client = get_client()
+
+        # verify if it exists already
+        i = self.get_resource("importer", name)
+        if i is not None:
+            print(f"Importer {name} already existed")
+            if not replace:
+                return
+            else:
+                print(f"Deleting current importer {name}")
+                i.delete()
+
+        print(f"Creation of importer {name}")
+
+        importer_info = client.create(
+            "/odata/importers/",
+            data={
+                "project": self.odata,
+                "name": name,
+                "comment": comment
+            }
+        )
+
+        importer = Importer(importer_info)
+
+        importer.update(
+            gate_name=gate_name,
+            root_dir_path=root_dir_path,
+            crontab=crontab,
+            parse_script=parse_script,
+            re_run_last_file=re_run_last_file,
+            activate=False
+        )
+
+        print(f"The importer {name} has been successfully created")
+
+        if activate:
+            importer.activate()
+            print(f"The importer {name} has been successfully activated")
+
+            if waiting_for_outputs and outputs_length>0:
+                importer.wait_for_outputs(outputs_length, sleep_loop_time, abort_time)
+
+        return importer
+
+    def create_analysis(
+            self,
+            name,
+            inputs_list,
+            inputs_config_fct,
+            output_names_list,
+            outputs_config_fct,
+            input_freq,
+            output_freq,
+            clock,
+            output_timezone,
+            script,
+            start_with_first=False,
+            wait_for_last=False,
+            before_offset_strict_mode=False,
+            custom_before_offset=None,
+            custom_after_offset=None,
+            custom_delay=None,
+            wait_offset='6H',
+            comment="",
+            activate=True,
+            replace=False
+    ):
+        """
+        Parameters
+        ----------
+
+        name: string
+            The name of the analysis
+
+        inputs_list: list of series resources
+            The script loops through this list to create the analysis_inputs according to the following function
+
+        inputs_config_fct: function
+            This function takes a series resource as argument and returns the associated input config
+
+        output_names_list: list
+            The list of the output names. You can't retrieve it from a test for the moment.
+            The script loops through this list to create the analysis_outputs according to the following function
+
+        outputs_config_fct: function
+            This function takes the name of the output as argument and returns the associated output config
+
+        input_freq: string (pandas freq format)
+            The freq of the input dataframe
+
+        output_freq: string (pandas freq format)
+            the freq of the output dataframe
+
+        clock: ["gmt", "dst", "tzt"]
+            the clock of the output dataframe
+
+        output_timezone: string
+            the timezone of the output dataframe
+
+        script: string
+            the full analysis script
+
+        start_with_first: boolean
+            start analysis with first data ignoring custom offsets
+
+        wait_for_last: boolean
+            wait for all series to have data to launch analysis
+
+        before_offset_strict_mode: boolean
+            don't start analysis until the custom_before_offset is reached
+
+        custom_before_offset: string (pandas freq format)
+            the quantity of data before time t to compute the value at time t
+
+        custom_after_offset: string (pandas freq format)
+            the quantity of data after time t to compute the value at time t
+
+        custom_delay: string (pandas freq format)
+
+        wait_offset: string (pandas freq format)
+
+        comment: string, defaut ""
+            An optional comment for the analysis
+
+        activate: boolean, default True
+            True -> The analysis get activated after creation
+
+        replace: boolean, default False
+            True -> If an analysis with the same name already exists, it gets deleted and a new one get created
+            False ->  If an analysis with the same name already exists, a message informs you and nothing get created
 
 
-def create_project(
-        client,
-        organization,
-        project_name,
-        display_buildings=True,
-        project_comment=""
-):
-    """
-    Parameters
-    ----------
+        Returns
+        -------
 
-    client: RESTClient
-        See openergy.set_client()
+        The analysis record that has been created
+        """
 
-    organization: dictionary
-        Organization record
+        #Touchy import
+        from . import Analysis
 
-    project_name: string
-        The name of the project
+        client = get_client()
 
-    display_buildings: boolean
-        Decides if the building section is displayed on the platform for this project
+        # verify if it exists already
+        a = self.get_resource("analysis", name)
+        if a is not None:
+            print(f"Analysis {name} already existed")
+            if not replace:
+                return
+            else:
+                print(f"Deleting current analysis {name}")
+                a.delete()
 
-    project_comment: string
-        An optional comment
+        print(f"Creation of analysis {name}")
 
-    Returns
-    -------
+        analysis_info = client.create(
+            "odata/analyses",
+            data={
+                "project": self.odata,
+                "name": name,
+                "comment": comment
+            }
+        )
 
-    The created project record as a dictionary
+        analysis = Analysis(analysis_info)
 
-    """
+        # inputs
+        for input_se in inputs_list:
+            input_config = inputs_config_fct(input_se)
+            input_config["analysis"] = analysis.id
+            client.create(
+                "odata/analysis_inputs",
+                data=input_config
+            )
 
-    project = client.create(
-        "/oteams/projects/",
-        data={
-            "organization": organization["id"],
-            "name": project_name,
-            "display_buildings": display_buildings,
-            "comment": project_comment
-        }
-    )
+        # config
 
-    print(f"The project {project_name} has been successfully created")
+        client.create(
+            "odata/analysis_configs",
+            data={
+                "analysis": analysis.id,
+                # Basic
+                "script_method": 'array',
+                "input_freq": input_freq,
+                "output_freq": output_freq,
+                "clock": clock,
+                "output_timezone": output_timezone,
+                "script": script,
 
-    return project
+                # Expert
+                "start_with_first": start_with_first,
+                "wait_for_last": wait_for_last,
+                "before_offset_strict_mode": before_offset_strict_mode,
+                "custom_before_offset": custom_before_offset,
+                "custom_after_offset": custom_after_offset,
 
+                # Outputs
+                "custom_delay": custom_delay,
+                "wait_offset": wait_offset
+            }
+        )
 
-def delete_project(
-        client,
-        project
-):
-    """
-    Parameters
-    ----------
+        # outputs
+        for output_name in output_names_list:
+            output_config = outputs_config_fct(output_name)
+            output_config["analysis"] = analysis.id
+            client.create(
+                "odata/analysis_outputs",
+                data=output_config
+            )
 
-    client: RESTClient
-        See openergy.set_client()
+        print(f"The analysis {name} has been successfully created")
 
-    project: dictionary
-        project record
-    """
+        if activate:
+            analysis.activate()
+            print(f"The analysis {name} has been successfully activated")
 
-    project = client.retrieve(
-        "oteams/projects",
-        project["id"]
-    )
-
-    if project is None:
-        return
-
-    client.destroy(
-        "oteams/projects",
-        project
-    )
-
-    print(f"The organization {project['name']} has been successfully deleted")
+        return analysis
