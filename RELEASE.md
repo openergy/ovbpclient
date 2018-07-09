@@ -2,6 +2,14 @@
 
 (p): patch, (m): minor, (M): major
 
+## next
+
+## 3.1.6
+* p: pip pytables/tables bug fix
+
+## 3.1.5
+* p: updated requirements and changed CI configuration
+
 ## 3.1.4
 * p: compatibility with async series io
 
