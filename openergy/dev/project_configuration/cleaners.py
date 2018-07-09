@@ -21,7 +21,9 @@ class Cleaner(Generator):
             self,
             unitcleaner_config_fct,
             activate=True,
-            replace=False
+            replace=False,
+            waiting_for_outputs=False,
+            outputs_length=0
     ):
         """
         Parameters
@@ -78,6 +80,9 @@ class Cleaner(Generator):
                 uc = Unitcleaner(uc_info)
                 uc.activate()
                 print(f'{se["external_name"]} activated.')
+
+                if waiting_for_outputs:
+                    self.wait_for_outputs(outputs_length)
 
         return self.get_detailed_info()
 

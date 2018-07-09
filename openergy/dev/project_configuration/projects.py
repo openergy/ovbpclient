@@ -381,7 +381,9 @@ class Project:
             wait_offset='6H',
             comment="",
             activate=True,
-            replace=False
+            replace=False,
+            waiting_for_outputs=False,
+            outputs_length=0
     ):
         """
         Parameters
@@ -532,5 +534,8 @@ class Project:
         if activate:
             analysis.activate()
             print(f"The analysis {name} has been successfully activated")
+
+            if waiting_for_outputs:
+                analysis.wait_for_outputs(outputs_length)
 
         return analysis

@@ -22,7 +22,7 @@ class Generator(Resource, ActivationMixin):
 
         r = client.list(
             "odata/series",
-            params = {
+            params={
                 "generator":self.id
             }
         )["data"]

@@ -5,14 +5,17 @@ from . import Resource, ActivationMixin
 
 class Gate(Resource):
 
-    model = "gate"
+    def __init__(self, info):
+        super().__init__(info)
+        self.model = "gate"
+        self._password = None
 
     def create_oftp_account(self):
 
         client = get_client()
 
         client.detail_route(
-            "odata/gate_ftp_account",
+            "odata/gate_ftp_accounts",
             self.ftp_account,
             "POST",
             "attach_new_oftp_account",
@@ -30,8 +33,6 @@ class Gate(Resource):
                 "crontab": crontab
             }
         )
-
-        print("base_feeder_info", base_feeder_info)
 
         return BaseFeeder(base_feeder_info)
 
@@ -59,6 +60,20 @@ class Gate(Resource):
         )
 
         return self.get_detailed_info()
+
+    @property
+    def ftp_account_password(self):
+
+        client = get_client()
+
+        self._password = client.detail_route(
+            "odata/gate_ftp_accounts",
+            self.ftp_account['id'],
+            "GET",
+            "password"
+        )
+
+        return self._password
 
 
 class BaseFeeder(ActivationMixin):
