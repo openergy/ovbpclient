@@ -71,7 +71,7 @@ class Gate(Resource):
             self.ftp_account['id'],
             "GET",
             "password"
-        )
+        )["password"]
 
         return self._password
 

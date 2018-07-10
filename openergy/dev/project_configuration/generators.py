@@ -45,7 +45,7 @@ class Generator(Resource, ActivationMixin):
 
             if (dt.datetime.now() - start_time) < dt.timedelta(seconds=abort_time):
 
-                print('...')
+                print('Waiting for outputs...')
                 time.sleep(sleep_loop_time)
 
                 outputs = client.list(
@@ -59,6 +59,7 @@ class Generator(Resource, ActivationMixin):
 
                 if len(outputs) == outputs_length:
                     print(f"Outputs are ready \n\n")
+                    print("outputs", outputs)
                     return
 
             else:

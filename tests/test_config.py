@@ -52,8 +52,6 @@ class ConfigurationTest(unittest.TestCase):
 
         self.internal_gate.get_detailed_info()
 
-        pprint(self.internal_gate._info)
-
         # create an external gate
         self.external_gate = self.project.create_external_gate(
             name="Test External Gate",
@@ -67,17 +65,20 @@ class ConfigurationTest(unittest.TestCase):
         self.assertTrue(self.project.get_resource("gate", "Test External Gate") is not None)
 
         # fill artificially a gate
-        with ftputil.FTPHost(self.internal_gate.host, self.internal_gate.login, self.internal_gate.password) as ftp:
-            with open("resources/Test File.csv", "rb") as source:
-                with ftp.open("Test File.csv", "wb") as target:
-                    target.write(source.content())
+        with ftputil.FTPHost(
+                self.internal_gate.ftp_account["host"],
+                self.internal_gate.ftp_account["login"],
+                self.internal_gate.ftp_account_password) as ftp:
+            with open("resources/config/test_data.csv", "rb") as source:
+                with ftp.open("test_data.csv", "wb") as target:
+                    target.write(source.read())
 
         # get parse_script
-        with open("resources/parse_script", "r") as f:
+        with open("resources/config/parse_script.py", "r") as f:
             parse_script = f.read()
 
         # create an importer and activate it
-        importer = self.project.create_importer(
+        self.importer = self.project.create_importer(
             name="Test Importer",
             gate_name="Test Internal Gate",
             parse_script=parse_script,
@@ -106,7 +107,7 @@ class ConfigurationTest(unittest.TestCase):
                 resample_rule="mean"
             )
 
-        self.cleaner = self.project.get_resource("cleaner", importer.name)
+        self.cleaner = self.project.get_resource("cleaner", self.importer.name)
         self.cleaner.configure_all(
             unitcleaner_config_fct=unit_cleaner_config_fct,
             activate=True,
@@ -140,7 +141,7 @@ class ConfigurationTest(unittest.TestCase):
         # create analysis and activate it
 
         # get parse_script
-        with open("resources/analysis_script", "r") as f:
+        with open("resources/config/analysis_script.py", "r") as f:
             analysis_script = f.read()
 
         self.analysis = self.project.create_analysis(

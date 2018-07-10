@@ -48,6 +48,8 @@ class Cleaner(Generator):
 
         client = get_client()
 
+        print(f"Configuration of cleaner {self.name}")
+
         # retrieve unitcleaners
         importer_series = client.list(
             "/odata/importer_series/",
@@ -81,8 +83,8 @@ class Cleaner(Generator):
                 uc.activate()
                 print(f'{se["external_name"]} activated.')
 
-                if waiting_for_outputs:
-                    self.wait_for_outputs(outputs_length)
+        if waiting_for_outputs:
+            self.wait_for_outputs(outputs_length)
 
         return self.get_detailed_info()
 
