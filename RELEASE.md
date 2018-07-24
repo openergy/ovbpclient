@@ -2,6 +2,8 @@
 
 (p): patch, (m): minor, (M): major
 
+## next
+
 ## 3.3.0
 * m: data_scan added for generators and projects
 * p: get_full_list added to get more than 200 elements in request answer
