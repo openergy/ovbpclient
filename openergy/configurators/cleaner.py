@@ -273,7 +273,16 @@ class CleanerConfigurator:
         data["cleaner"] = self.cleaner_id
 
         # we create
-        self.client.create("odata/unitcleaners/", data)
+        uc = self.client.create("odata/unitcleaners/", data)
+
+        self.client.detail_route(
+            "odata/unitcleaners/",
+            uc["id"],
+            "PATCH",
+            "active",
+            data={"value": True}
+        )
+
         print(data['name'] + ' has been successfully configured')
 
     def excel_to_platform(self, xlsx_path, update_if_exists=False):
@@ -304,7 +313,6 @@ def batch_configure(path, max_input_length=20000):
                 # An empty cell is None
                 external_name=ws['A{}'.format(row)].value,
                 name=ws['B{}'.format(row)].value if ws['B{}'.format(row)].value else ws['A{}'.format(row)].value,
-                active=ws['D{}'.format(row)].value,
                 freq=ws['E{}'.format(row)].value,
                 input_unit_type=ws['F{}'.format(row)].value,
                 input_convention=ws['G{}'.format(row)].value,

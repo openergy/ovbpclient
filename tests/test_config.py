@@ -1,5 +1,6 @@
 import ftputil
 import unittest
+import pandas as pd
 from pprint import pprint
 
 import openergy as op
@@ -124,7 +125,7 @@ class ConfigurationTest(unittest.TestCase):
         def inputs_config_fct(input_se):
             return get_analysis_input_config(
                 input_series_name=input_se.name,
-                column_name=input_se.name,
+                column_name=f"{input_se.name} analyzed",
                 input_series_generator=input_se.generator["id"]
             )
 
@@ -162,3 +163,11 @@ class ConfigurationTest(unittest.TestCase):
 
         self.assertTrue(self.project.get_resource("analysis", "Test Analysis") is not None)
         self.assertEqual(2, len(self.analysis.get_outputs()))
+
+        self.analysis.reset()
+        self.assertEqual(2, len(self.analysis.get_outputs()))
+
+        # test data_scan
+        df = self.project.data_scan()
+        print(df)
+        self.assertEqual(len(df), 6)

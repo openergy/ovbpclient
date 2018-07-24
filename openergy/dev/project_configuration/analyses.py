@@ -1,4 +1,4 @@
-from openergy import get_client
+from openergy import get_client, get_full_list
 from . import Generator
 
 
@@ -6,13 +6,17 @@ class Analysis(Generator):
 
     def __init__(self, info):
         super().__init__(info)
+
+        # from Resource
         self.model = "analysis"
+
+        # from ActivationMixin
         self.activable_object_model = "analysis"
         self.activable_object_id = self.id
 
     def update(
             self,
-            name = None,
+            name=None,
             inputs_list=None,
             inputs_config_fct=None,
             output_names_list=None,
@@ -31,7 +35,8 @@ class Analysis(Generator):
             wait_offset=None,
             comment=None,
             activate=True,
-            wait_for_outputs=False
+            waiting_for_outputs=False,
+            outputs_lentgh = 0
     ):
 
         client = get_client()
@@ -56,12 +61,12 @@ class Analysis(Generator):
         if inputs_list is not None:
 
             # delete old inputs
-            old_inputs = client.list(
+            old_inputs = get_full_list(
                 "odata/analysis_inputs",
                 params={
                     "analysis": self.id
                 }
-            )["data"]
+            )
 
             for input in old_inputs:
                 client.destroy(
@@ -124,7 +129,7 @@ class Analysis(Generator):
         # outputs
         if output_names_list is not None:
             # delete old inputs
-            old_outputs = client.list(
+            old_outputs = get_full_list(
                 "odata/analysis_outputs",
                 params={
                     "analysis": self.id
@@ -151,11 +156,16 @@ class Analysis(Generator):
         if activate:
             self.activate()
 
+            if waiting_for_outputs and (outputs_lentgh>0):
+                self.wait_for_outputs(outputs_lentgh)
+
         return self.get_detailed_info()
 
     def reset(
             self,
-            partial_instant=None
+            partial_instant=None,
+            waiting_for_outputs=False,
+            outputs_lentgh = 0
     ):
         """
         Parameters
@@ -165,11 +175,13 @@ class Analysis(Generator):
             The date from which the outputs are reset.
             If None, full reset.
 
+        waiting_for_outputs
+
         """
 
         client = get_client()
 
-        data = {"value": "reset"}
+        data = {"name": "reset"}
 
         if partial_instant is not None:
             data["partial_instant"] = partial_instant
@@ -181,6 +193,9 @@ class Analysis(Generator):
             "action",
             data=data
         )
+
+        if waiting_for_outputs and (outputs_lentgh > 0):
+            self.wait_for_outputs(outputs_lentgh)
 
 
 def get_analysis_input_config(

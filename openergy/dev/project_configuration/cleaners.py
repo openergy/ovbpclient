@@ -1,4 +1,4 @@
-from openergy import get_client
+from openergy import get_client, get_full_list
 from . import Generator, ActivationMixin
 
 
@@ -51,10 +51,10 @@ class Cleaner(Generator):
         print(f"Configuration of cleaner {self.name}")
 
         # retrieve unitcleaners
-        importer_series = client.list(
+        importer_series = get_full_list(
             "/odata/importer_series/",
             params={"generator": self.related_importer}
-        )["data"]
+        )
 
         # configure unitcleaners
         for se in importer_series:
@@ -83,7 +83,7 @@ class Cleaner(Generator):
                 uc.activate()
                 print(f'{se["external_name"]} activated.')
 
-        if waiting_for_outputs:
+        if waiting_for_outputs and (outputs_length>0):
             self.wait_for_outputs(outputs_length)
 
         return self.get_detailed_info()
@@ -184,11 +184,20 @@ def get_unitcleaner_config(
         input_convention,
         clock,
         timezone,
-        wait_offset="6H",
         unit=None,
         resample_rule=None,
         interpolate_limit=None,
-        custom_delay=None
+        wait_offset="6H",
+        label=None,
+        input_expected_regular=None,
+        operation_fct=None,
+        filter_fct=None,
+        derivative_filter_fct=None,
+        custom_delay=None,
+        custom_fct=None,
+        custom_before_offset=None,
+        custom_after_offset=None,
+
 ):
     data = {
         "external_name": external_name,
@@ -203,11 +212,44 @@ def get_unitcleaner_config(
         "custom_delay": custom_delay
     }
 
+    optional_fields = [
+        "unit",
+        "resample_rule",
+        "interpolate_limit",
+        "label",
+        "input_expected_regular",
+        "operation_fct",
+        "filter_fct",
+        "derivative_filter_fct",
+        "custom_delay",
+        "custom_fct",
+        "custom_before_offset",
+        "custom_after_offset"
+    ]
+
     if unit is not None:
         data["unit"] = unit
     if resample_rule is not None:
         data["resample_rule"] = resample_rule
     if interpolate_limit is not None:
         data["interpolate_limit"] = interpolate_limit
+    if label is not None:
+        data["label"] = label
+    if input_expected_regular is not None:
+        data["input_expected_regular"] = input_expected_regular,
+    if operation_fct is not None:
+        data["operation_fct"] = operation_fct,
+    if filter_fct is not None:
+        data["filter_fct"] = filter_fct,
+    if derivative_filter_fct is not None:
+        data["derivative_filter_fct"] = derivative_filter_fct,
+    if custom_delay is not None:
+        data["custom_delay"] = custom_delay,
+    if custom_fct is not None:
+        data["custom_delay"] = custom_fct,
+    if custom_before_offset is not None:
+        data["custom_before_offset"] = custom_before_offset,
+    if custom_after_offset is not None:
+        data["custom_after_offset"] = custom_after_offset,
 
     return data

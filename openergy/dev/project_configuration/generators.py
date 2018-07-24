@@ -1,7 +1,10 @@
 import time
 import datetime as dt
+from collections import OrderedDict
+import pandas as pd
+import numpy as np
 
-from openergy import get_client, get_odata_url
+from openergy import get_client, get_odata_url, get_full_list
 from . import Resource, ActivationMixin
 
 
@@ -20,12 +23,12 @@ class Generator(Resource, ActivationMixin):
 
         client = get_client()
 
-        r = client.list(
+        r = get_full_list(
             "odata/series",
             params={
                 "generator":self.id
             }
-        )["data"]
+        )
 
         return [Series(info) for info in r]
 
@@ -48,18 +51,17 @@ class Generator(Resource, ActivationMixin):
                 print('Waiting for outputs...')
                 time.sleep(sleep_loop_time)
 
-                outputs = client.list(
+                outputs = get_full_list(
                     "odata/series",
                     params={
                         "generator": self.id
                     }
-                )["data"]
+                )
 
                 print(f"{len(outputs)} outputs generated over {outputs_length} expected")
 
                 if len(outputs) == outputs_length:
                     print(f"Outputs are ready \n\n")
-                    print("outputs", outputs)
                     return
 
             else:
@@ -120,3 +122,36 @@ class Generator(Resource, ActivationMixin):
             self._info = None
 
             print(f"The {self.model} {name} has been successfully deleted")
+
+    def data_scan(self):
+        outputs = self.get_outputs()
+        df_data = OrderedDict({
+            "Organization": self.get_organization().name,
+            "Project": self.get_project().name,
+            "Generator Model": self.model,
+            "Generator Name": self.name,
+            "Series Name": [],
+            "Series Start": [],
+            "Series End" : [],
+            "Timestep": [],
+            "Points Last Day": [],
+            "Points Last Week": []
+        })
+        for out in outputs:
+            df_data["Series Name"] += [out.name]
+            df_data["Timestep"] += [out.freq]
+
+            if out.start is not None:
+                df_data["Series Start"] += [out.start]
+                df_data["Series End"] += [out.end]
+                df_data["Points Last Week"] += \
+                    [out.get_data(start=dt.datetime.now() - dt.timedelta(days=7)).notnull().sum()]
+                df_data["Points Last Day"] += \
+                    [out.get_data(start=dt.datetime.now() - dt.timedelta(days=1)).notnull().sum()]
+            else:
+                df_data["Series Start"] += [np.datetime64('NaT')]
+                df_data["Series End"] += [np.datetime64('NaT')]
+                df_data["Points Last Week"] += [0]
+                df_data["Points Last Day"] += [0]
+
+        return pd.DataFrame(df_data)

@@ -1,15 +1,4 @@
-from openergy import get_client, is_uuid
-
-
-def create_organization(name):
-    client = get_client()
-    new_org_info = client.create(
-        "oteams/organization",
-        data={
-            "name":name
-        }
-    )
-    return new_org_info
+from openergy import get_client, get_full_list
 
 
 class Organization:
@@ -143,16 +132,33 @@ class Organization:
 
     def get_all_projects(self):
 
-        client = get_client()
-
-        r = client.list(
+        r = get_full_list(
             "oteams/projects",
             params={
                 "organization":self.id
             }
-        )["data"]
+        )
 
         # Touchy import
         from . import Project
 
         return [Project(info) for info in r]
+
+
+def create_organization(name):
+    client = get_client()
+    r = client.create(
+        "oteams/organization",
+        data={
+            "name":name
+        }
+    )
+    return Organization(r)
+
+
+def get_my_organizations():
+    client = get_client()
+    r = get_full_list(
+        "oteams/organizations"
+    )
+    return [Organization(org_info) for org_info in r]

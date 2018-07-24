@@ -72,6 +72,8 @@ def get_series_data(
             df_data[se_dict["name"]] = se
         df = pd.DataFrame(df_data)
         df.index = pd.to_datetime(df.index, unit='ms')
+        if len(df.columns) == 1:
+            return df[df.columns[0]]
         return df
 
 

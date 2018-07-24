@@ -1,5 +1,7 @@
+from openergy import get_client, get_full_list
+
+
 def get_notifications(
-        client,
         project_odata_id=None,
         resource=None,
         resource_model=None,
@@ -34,16 +36,15 @@ def get_notifications(
     if resolved is not None:
         params["resolved"] = resolved
 
-    notifications = client.list(
+    notifications = get_full_list(
         "odata/notifications",
         params=params
-    )["data"]
+    )
 
     return notifications
 
 
 def update_notification(
-        client,
         notification_resource,
         resolved=None
 ):
@@ -65,6 +66,8 @@ def update_notification(
     The updated notification
 
     """
+
+    client = get_client()
 
     data = {}
 

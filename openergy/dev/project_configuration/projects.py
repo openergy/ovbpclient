@@ -1,4 +1,6 @@
-from openergy import get_client, get_odata_url
+import pandas as pd
+
+from openergy import get_client, get_odata_url, get_full_list
 
 from . import Organization
 
@@ -28,17 +30,11 @@ class Project:
                     elif len(r) == 1:
                         id = r[0]["id"]
             else:
-                r = client.list(
-                    "/oteams/projects/",
-                    params={
-                        "odata": odata
-                    }
-                )["data"]
-
-            if len(r) == 0:
-                return
-            elif len(r) == 1:
-                id = r[0]["id"]
+                r = client.retrieve(
+                    "/odata/projects/",
+                    odata
+                )
+                id = r["base"]
 
         info = client.retrieve(
             "oteams/projects",
@@ -112,17 +108,17 @@ class Project:
 
         resource_classes = self._get_resource_classes(generators_only)
 
-        resources = []
+        resources = {}
 
-        for resource_model, resource_class  in resource_classes.items():
-            r = client.list(
+        for resource_model, resource_class in resource_classes.items():
+            r = get_full_list(
                 get_odata_url(resource_model),
                 params={
                     "project": self.odata
                 }
-            )["data"]
+            )
 
-            resources += [resource_class(info) for info in r]
+            resources[resource_model] = [resource_class(info) for info in r]
 
         return resources
 
@@ -131,18 +127,28 @@ class Project:
         resource_classes = self._get_resource_classes()
 
         client = get_client()
-        r = client.list(
+        r = get_full_list(
             get_odata_url(model),
             params={
                 "name": name,
                 "project": self.odata
             }
-        )["data"]
+        )
 
         if len(r) == 0:
             return None
         else:
             return resource_classes[model](r[0])
+
+    def data_scan(self):
+        client = get_client()
+        resources = self.get_all_resources(generators_only=True)
+        df_project = pd.DataFrame()
+        for resource_model, resources_list in resources.items():
+            for res in resources_list:
+                df_res = res.data_scan()
+                df_project = pd.concat([df_project, df_res], ignore_index=True)
+        return df_project
 
     def create_internal_gate(
         self,
@@ -172,7 +178,6 @@ class Project:
                 g.delete()
 
         print(f"Creation of new gate {name}")
-
         gate_info = client.create(
             get_odata_url("gate"),
             data={
@@ -181,19 +186,13 @@ class Project:
                 "comment": comment
             }
         )
-
         print(f"The gate {name} has been successfully created")
-
         gate = Gate(gate_info)
-
         gate.create_oftp_account()
 
         if not passive:
-
             base_feeder = gate.create_base_feeder(timezone, crontab)
-
             base_feeder.create_generic_basic_feeder(script)
-
             if activate:
                 base_feeder.activate()
                 print(f"The gate {name} has been successfully activated")

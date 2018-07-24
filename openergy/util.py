@@ -24,6 +24,26 @@ def get_odata_url(record):
         return f"odata/{record}s"
 
 
+def get_full_list(url, params={}):
+    client = get_client()
+
+    def get_data(start, full_list):
+        params["start"] = start
+        r = client.list(
+            url,
+            params=params
+        )["data"]
+
+        if len(r) == 0:
+            return full_list
+
+        full_list += r
+        return get_data(start + len(r), full_list)
+
+    _full_list = []
+    return get_data(0, _full_list)
+
+
 def get_series_info(uuid, detailed=True):
     """
     Returns

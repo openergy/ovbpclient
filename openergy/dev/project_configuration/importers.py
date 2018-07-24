@@ -64,7 +64,7 @@ class Importer(Generator):
             if activate:
                 self.activate()
 
-                if waiting_for_outputs:
+                if waiting_for_outputs and (outputs_length>0):
                     self.wait_for_outputs(outputs_length)
 
         return self.get_detailed_info()
