@@ -4,7 +4,7 @@ import pandas as pd
 from pprint import pprint
 
 import openergy as op
-from openergy.dev.project_configuration import *
+import openergy.dev.project_configuration as opdev
 
 
 class ConfigurationTest(unittest.TestCase):
@@ -17,7 +17,7 @@ class ConfigurationTest(unittest.TestCase):
         self.client = op.set_client(login, pwd, prod_url)
 
         # Get organization
-        self.organization = Organization.retrieve("Test Organization")
+        self.organization = opdev.Organization.retrieve("Test Organization")
 
         # Get the number of projects
         self.projects = self.organization.get_all_projects()
@@ -95,7 +95,7 @@ class ConfigurationTest(unittest.TestCase):
         # configure cleaner and activate it
         def unit_cleaner_config_fct(se):
 
-            return get_unitcleaner_config(
+            return opdev.get_unitcleaner_config(
                 external_name=se["external_name"],
                 name=se["external_name"],
                 freq="10T",
@@ -123,7 +123,7 @@ class ConfigurationTest(unittest.TestCase):
         self.inputs_list = self.cleaner.get_outputs()
 
         def inputs_config_fct(input_se):
-            return get_analysis_input_config(
+            return opdev.get_analysis_input_config(
                 input_series_name=input_se.name,
                 column_name=f"{input_se.name} analyzed",
                 input_series_generator=input_se.generator["id"]
@@ -133,7 +133,7 @@ class ConfigurationTest(unittest.TestCase):
         self.output_names_list = [f"{se.name} analyzed" for se in self.inputs_list]
 
         def outputs_config_fct(output_name):
-            return get_analysis_output_config(
+            return opdev.get_analysis_output_config(
                 name=output_name,
                 unit=output_name.split(" ")[0],
                 resample_rule="mean"
@@ -169,5 +169,4 @@ class ConfigurationTest(unittest.TestCase):
 
         # test data_scan
         df = self.project.data_scan()
-        print(df)
         self.assertEqual(len(df), 6)
