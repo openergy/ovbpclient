@@ -69,6 +69,13 @@ class Cleaner(Generator):
                 continue
 
             unitcleaner_config = unitcleaner_config_fct(se)
+
+            if not isinstance(unitcleaner_config, dict):
+                print(f"{se['external_name']} not configured")
+                continue
+
+            print(f'Configuration of {se["external_name"]}')
+
             unitcleaner_config["cleaner"] = self.id
 
             uc_info = client.create(
@@ -76,17 +83,50 @@ class Cleaner(Generator):
                 data=unitcleaner_config
             )
 
-            print(f'{se["external_name"]} configured.')
-
             if activate:
+                print(f'Activation of {se["external_name"]}')
                 uc = Unitcleaner(uc_info)
                 uc.activate()
-                print(f'{se["external_name"]} activated.')
 
         if waiting_for_outputs and (outputs_length>0):
             self.wait_for_outputs(outputs_length)
 
         return self.get_detailed_info()
+
+    def clear_all_configurations(self):
+
+        client = get_client()
+
+        # retrieve unitcleaners
+        importer_series = get_full_list(
+            "/odata/importer_series/",
+            params={"generator": self.related_importer}
+        )
+
+        # destroy all
+        for se in importer_series:
+            if se["unitcleaner"] is not None:
+                client.destroy(
+                    "/odata/unitcleaners/",
+                    se["unitcleaner"]
+                )
+
+        print(f"{len(importer_series)} configurations cleared")
+
+    def clear_one_configuration(self, external_name):
+
+        client = get_client()
+
+        se = self.get_importer_series_from_external_name(external_name)
+
+        if se["unitcleaner"] is not None:
+            client.destroy(
+                "/odata/unitcleaners/",
+                se["unitcleaner"]
+            )
+            print(f"{se['external_name']} configuration successfully cleared")
+        else:
+            print(f"{se['external_name']} not configured")
 
     def get_importer_series_from_external_name(
             self,
@@ -211,21 +251,6 @@ def get_unitcleaner_config(
         "wait_offset": wait_offset,
         "custom_delay": custom_delay
     }
-
-    optional_fields = [
-        "unit",
-        "resample_rule",
-        "interpolate_limit",
-        "label",
-        "input_expected_regular",
-        "operation_fct",
-        "filter_fct",
-        "derivative_filter_fct",
-        "custom_delay",
-        "custom_fct",
-        "custom_before_offset",
-        "custom_after_offset"
-    ]
 
     if unit is not None:
         data["unit"] = unit

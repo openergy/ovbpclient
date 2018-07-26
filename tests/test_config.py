@@ -170,3 +170,7 @@ class ConfigurationTest(unittest.TestCase):
         # test data_scan
         df = self.project.data_scan()
         self.assertEqual(len(df), 6)
+
+        # deletion tests
+        self.cleaner.clear_all_configurations()
+        self.assertEqual(len(self.cleaner.get_outputs()), 0)
