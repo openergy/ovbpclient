@@ -61,6 +61,20 @@ class Gate(Resource):
 
         return self.get_detailed_info()
 
+    def list_dir(self, path="/"):
+        client = get_client()
+
+        return client.list(
+            f"odata/gate_ftp_accounts/{self.ftp_account['id']}/list_dir/",
+            params={"path": path}
+        )["data"]
+
+    def check_last_files(self, path="/", n=1):
+        dir_list = self.list_dir(path)
+        files_list = [d["name"] for d in dir_list if d["type"]=="file"]
+        files_list.sort(reverse=True)
+        return files_list[:n]
+
     @property
     def ftp_account_password(self):
 

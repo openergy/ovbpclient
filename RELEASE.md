@@ -2,8 +2,11 @@
 
 (p): patch, (m): minor, (M): major
 
+## 3.4.0
+* m: added check_last_files() for a project
+
 ## 3.3.1
-* p: possibity to clear unitcleaner configuration
+* p: possibility to clear unitcleaner configuration
 
 ## 3.3.0
 * m: data_scan added for generators and projects

@@ -171,6 +171,12 @@ class ConfigurationTest(unittest.TestCase):
         df = self.project.data_scan()
         self.assertEqual(len(df), 6)
 
+        # test check_last_files
+        last_files = self.project.check_last_files()
+        self.assertEqual(2, len(last_files.keys()))
+        for gate, files in last_files.items():
+            self.assertEqual('test_data.csv', files[0])
+
         # deletion tests
         self.cleaner.clear_all_configurations()
         self.assertEqual(len(self.cleaner.get_outputs()), 0)

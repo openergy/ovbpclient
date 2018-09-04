@@ -87,46 +87,38 @@ class Project:
 
         print(f"The project {name} has been successfully deleted")
 
-    def _get_resource_classes(self, generators_only=False):
+    def _get_resource_classes(self):
 
         # Touchy imports
         from . import Gate, Importer, Cleaner, Analysis
 
-        classes = {
+        return {
+            "gate": Gate,
             "importer": Importer,
             "cleaner": Cleaner,
             "analysis": Analysis
         }
-        if not generators_only:
-            classes["gate"] = Gate
 
-        return classes
+    def get_all_resources(self, models=["gate", "importer", "cleaner", "analysis"] ):
 
-    def get_all_resources(self, generators_only=False):
-
-        client = get_client()
-
-        resource_classes = self._get_resource_classes(generators_only)
-
+        classes = self._get_resource_classes()
         resources = {}
 
-        for resource_model, resource_class in resource_classes.items():
+        for model in models:
             r = get_full_list(
-                get_odata_url(resource_model),
+                get_odata_url(model),
                 params={
                     "project": self.odata
                 }
             )
 
-            resources[resource_model] = [resource_class(info) for info in r]
+            resources[model] = [classes[model](info) for info in r]
 
         return resources
 
+
     def get_resource(self, model, name):
 
-        resource_classes = self._get_resource_classes()
-
-        client = get_client()
         r = get_full_list(
             get_odata_url(model),
             params={
@@ -138,17 +130,31 @@ class Project:
         if len(r) == 0:
             return None
         else:
-            return resource_classes[model](r[0])
+            return self._get_resource_classes()[model](r[0])
 
     def data_scan(self):
         client = get_client()
-        resources = self.get_all_resources(generators_only=True)
+        resources = self.get_all_resources(["importer", "cleaner", "analysis"])
         df_project = pd.DataFrame()
         for resource_model, resources_list in resources.items():
             for res in resources_list:
                 df_res = res.data_scan()
                 df_project = pd.concat([df_project, df_res], ignore_index=True)
         return df_project
+
+    def check_last_files(self,gates_dict={}):
+        gates_list = self.get_all_resources(models=["gate"])["gate"]
+        last_files = {}
+        for g in gates_list:
+            path = "/"
+            n = 1
+            if g.name in gates_dict.keys():
+                if "path" in gates_dict[g.name]:
+                    path = gates_dict[g.name]["path"]
+                if "n" in gates_dict[g.name]:
+                    n = gates_dict[g.name]["n"]
+            last_files[g.name] = g.check_last_files(path, n)
+        return last_files
 
     def create_internal_gate(
         self,
