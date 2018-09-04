@@ -6,7 +6,7 @@
 * m: added check_last_files() for a project
 
 ## 3.3.1
-* p: possibility to clear unitcleaner configuration
+* p: possibity to clear unitcleaner configuration
 
 ## 3.3.0
 * m: data_scan added for generators and projects
