@@ -3,7 +3,7 @@
 (p): patch, (m): minor, (M): major
 
 ## 3.4.0
-* m: added check_last_files() for a project
+* m: added check_last_files() for a project 
 
 ## 3.3.1
 * p: possibity to clear unitcleaner configuration
