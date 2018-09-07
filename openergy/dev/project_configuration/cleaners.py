@@ -8,12 +8,6 @@ class Cleaner(Generator):
         super().__init__(info)
         self.model = "cleaner"
 
-    def activate(self):
-        return
-
-    def deactivate(self):
-        return
-
     def delete(self):
         print("Impossible to delete a cleaner")
 
@@ -203,6 +197,33 @@ class Cleaner(Generator):
                 print(f'Unitcleaner {external_name} activated.')
 
             return uc_info
+
+    def get_unitcleaners(self):
+
+        unitcleaners = get_full_list(
+            "/odata/unitcleaners/",
+            params={"cleaner": self.id}
+        )
+
+        if len(unitcleaners) > 0:
+            return[Unitcleaner(uc) for uc in unitcleaners]
+        else:
+            print(f"Cleaner {self.name} has no unitcleaners")
+            return
+
+    def activate(self):
+        unitcleaners = self.get_unitcleaners()
+        if unitcleaners is not None:
+            for uc in unitcleaners:
+                if not uc.active:
+                    uc.activate()
+
+    def deactivate(self):
+        unitcleaners = self.get_unitcleaners()
+        if unitcleaners is not None:
+            for uc in unitcleaners:
+                if uc.active:
+                    uc.deactivate()
 
 
 class Unitcleaner(ActivationMixin):

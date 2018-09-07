@@ -142,18 +142,30 @@ class Project:
                 df_project = pd.concat([df_project, df_res], ignore_index=True)
         return df_project
 
-    def check_last_files(self,gates_dict={}):
+    def check_last_files(self,paths_dict={}):
+        """
+        Parameters
+        ----------
+
+        paths_dict: dictionary
+            Keys: gates names
+            Values: List of path to check
+
+            Example: {"gate1": ["path1", "path2"], "gate2": ["path1", "path2"]}
+
+        Returns
+        -------
+
+        The last files of each gate of the project as a dictionary
+        """
         gates_list = self.get_all_resources(models=["gate"])["gate"]
         last_files = {}
         for g in gates_list:
-            path = "/"
-            n = 1
-            if g.name in gates_dict.keys():
-                if "path" in gates_dict[g.name]:
-                    path = gates_dict[g.name]["path"]
-                if "n" in gates_dict[g.name]:
-                    n = gates_dict[g.name]["n"]
-            last_files[g.name] = g.check_last_files(path, n)
+            paths_list = ["/"]
+            if g.name in paths_dict.keys():
+                paths_list = paths_dict[g.name]
+            for p in paths_list:
+                last_files[f"{g.name}@{p}"] = g.check_last_files(p)
         return last_files
 
     def create_internal_gate(
@@ -544,3 +556,19 @@ class Project:
                 analysis.wait_for_outputs(outputs_length)
 
         return analysis
+
+    def deactivate(self):
+        """
+        Deactivate all resources of the project (gates, importers, cleaners, analyses)
+
+        """
+        resources = self.get_all_resources()
+        for model, res_l in resources.items():
+            if model == "analysis":
+                models = "analysis"
+            else:
+                models = f"{model}s"
+            print(f"Deactivating all {models}")
+            for res in res_l:
+                res.deactivate()
+

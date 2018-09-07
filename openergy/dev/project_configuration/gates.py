@@ -36,6 +36,24 @@ class Gate(Resource):
 
         return BaseFeeder(base_feeder_info)
 
+    def get_base_feeder(self):
+        self.get_detailed_info()
+        if self._info["base_feeder"] is not None:
+            return BaseFeeder(self._info["base_feeder"])
+        else:
+            print(f"Gate {self._info['name']} has no base_feeder")
+            return
+
+    def deactivate(self):
+        base_feeder = self.get_base_feeder()
+        if base_feeder is not None:
+            base_feeder.deactivate()
+
+    def activate(self):
+        base_feeder = self.get_base_feeder()
+        if base_feeder is not None:
+            base_feeder.activate()
+
     def update_external_ftp(
         self,
         host,
@@ -69,11 +87,11 @@ class Gate(Resource):
             params={"path": path}
         )["data"]
 
-    def check_last_files(self, path="/", n=1):
+    def check_last_files(self, path="/"):
         dir_list = self.list_dir(path)
         files_list = [d["name"] for d in dir_list if d["type"]=="file"]
         files_list.sort(reverse=True)
-        return files_list[:n]
+        return files_list
 
     @property
     def ftp_account_password(self):

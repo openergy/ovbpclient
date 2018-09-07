@@ -62,6 +62,10 @@ class Resource:
 
         return self._info
 
+    @property
+    def info(self):
+        return self._info
+
     def get_project(self):
         return Project.retrieve(odata=self.project)
 
