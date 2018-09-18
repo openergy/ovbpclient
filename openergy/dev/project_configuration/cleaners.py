@@ -13,7 +13,7 @@ class Cleaner(Generator):
 
     def configure_all(
             self,
-            unitcleaner_config_fct,
+            unitcleaners_config_fct,
             activate=True,
             replace=False,
             waiting_for_outputs=False,
@@ -23,7 +23,7 @@ class Cleaner(Generator):
         Parameters
         ----------
 
-        unitcleaner_config_fct: fct
+        unitcleaners_config_fct: fct
             This function takes one input series resource as argument.
             You have to code this function so that it returns the configuration depending on each series
 
@@ -62,7 +62,8 @@ class Cleaner(Generator):
                 print(f"Unitcleaner for series {se['external_name']} already exists")
                 continue
 
-            unitcleaner_config = unitcleaner_config_fct(se)
+            external_name = se["external_name"]
+            unitcleaner_config = unitcleaners_config_fct(external_name)
 
             if not isinstance(unitcleaner_config, dict):
                 print(f"{se['external_name']} not configured")
@@ -71,6 +72,9 @@ class Cleaner(Generator):
             print(f'Configuration of {se["external_name"]}')
 
             unitcleaner_config["cleaner"] = self.id
+            unitcleaner_config["external_name"] = se["external_name"]
+            if unitcleaner_config["name"] is None:
+                unitcleaner_config["name"] = se["external_name"]
 
             uc_info = client.create(
                 "/odata/unitcleaners/",
@@ -146,17 +150,27 @@ class Cleaner(Generator):
     def configure_one(
             self,
             external_name,
-            name,
-            freq,
-            input_unit_type,
-            unit_type,
-            input_convention,
-            clock,
-            timezone,
+            name=None,
+            freq="1H",
+            input_unit_type="instantaneous",
+            unit_type="instantaneous",
+            input_convention="left",
+            clock="tzt",
+            timezone="Europe/Paris",
             unit=None,
-            resample_rule=None,
+            resample_rule="mean",
             interpolate_limit=None,
-            activate=True
+            wait_offset="6H",
+            label=None,
+            input_expected_regular=None,
+            operation_fct=None,
+            filter_fct=None,
+            derivative_filter_fct=None,
+            custom_delay=None,
+            custom_fct=None,
+            custom_before_offset=None,
+            custom_after_offset=None,
+            activate=True,
     ):
 
         client = get_client()
@@ -165,24 +179,28 @@ class Cleaner(Generator):
 
         if importer_series is not None:
 
-            data = {
-                "cleaner": self.id,
-                "external_name": external_name,
-                "name": name,
-                "freq": freq,
-                "input_unit_type": input_unit_type,
-                "unit_type": unit_type,
-                "input_convention": input_convention,
-                "clock": clock,
-                "timezone": timezone,
-            }
-
-            if unit is not None:
-                data["unit"] = unit
-            if resample_rule is not None:
-                data["resample_rule"] = resample_rule
-            if interpolate_limit is not None:
-                data["interpolate_limit"] = interpolate_limit
+            data = configure_unitcleaner(
+                external_name if name is None else name,
+                freq,
+                input_unit_type,
+                unit_type,
+                input_convention,
+                clock,
+                timezone,
+                unit,
+                resample_rule,
+                interpolate_limit,
+                wait_offset,
+                label,
+                input_expected_regular,
+                operation_fct,
+                filter_fct,
+                derivative_filter_fct,
+                custom_delay,
+                custom_fct,
+                custom_before_offset,
+                custom_after_offset
+            )
 
             uc_info = client.create(
                 "/odata/unitcleaners/",
@@ -191,12 +209,13 @@ class Cleaner(Generator):
 
             print(f'Unitcleaner {external_name} configured.')
 
+            uc = Unitcleaner(uc_info)
+
             if activate:
-                uc = Unitcleaner(uc_info)
                 uc.activate()
                 print(f'Unitcleaner {external_name} activated.')
 
-            return uc_info
+            return uc
 
     def get_unitcleaners(self):
 
@@ -236,17 +255,16 @@ class Unitcleaner(ActivationMixin):
         self.activable_object_id = self.id
 
 
-def get_unitcleaner_config(
-        external_name,
-        name,
-        freq,
-        input_unit_type,
-        unit_type,
-        input_convention,
-        clock,
-        timezone,
+def configure_unitcleaner(
+        name = None,
+        freq = "1H",
+        input_unit_type = "instantaneous",
+        unit_type = "instantaneous",
+        input_convention = "left",
+        clock = "tzt",
+        timezone = "Europe/Paris",
         unit=None,
-        resample_rule=None,
+        resample_rule="mean",
         interpolate_limit=None,
         wait_offset="6H",
         label=None,
@@ -257,11 +275,10 @@ def get_unitcleaner_config(
         custom_delay=None,
         custom_fct=None,
         custom_before_offset=None,
-        custom_after_offset=None,
-
+        custom_after_offset=None
 ):
+
     data = {
-        "external_name": external_name,
         "name": name,
         "freq": freq,
         "input_unit_type": input_unit_type,
@@ -269,14 +286,13 @@ def get_unitcleaner_config(
         "input_convention": input_convention,
         "clock": clock,
         "timezone": timezone,
+        "resample_rule": resample_rule,
         "wait_offset": wait_offset,
         "custom_delay": custom_delay
     }
 
     if unit is not None:
         data["unit"] = unit
-    if resample_rule is not None:
-        data["resample_rule"] = resample_rule
     if interpolate_limit is not None:
         data["interpolate_limit"] = interpolate_limit
     if label is not None:

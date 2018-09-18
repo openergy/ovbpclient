@@ -2,8 +2,11 @@
 
 (p): patch, (m): minor, (M): major
 
-## next
+## 3.5.0
 * m: possibility to deactivate all resources
+* m: get_unticleaner_config becomes configure_unitcleaner (external_name as input only)
+* m: To retrieve a resource, no need to precise model anymore
+* m: Within a project, get_gate, get_importer, get_cleaner, get_analysis available
 
 ## 3.4.0
 * m: added check_last_files() for a project 

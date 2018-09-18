@@ -99,7 +99,7 @@ class Project:
             "analysis": Analysis
         }
 
-    def get_all_resources(self, models=["gate", "importer", "cleaner", "analysis"] ):
+    def get_all_resources(self, models=["gate", "importer", "cleaner", "analysis"]):
 
         classes = self._get_resource_classes()
         resources = {}
@@ -116,7 +116,6 @@ class Project:
 
         return resources
 
-
     def get_resource(self, model, name):
 
         r = get_full_list(
@@ -132,8 +131,19 @@ class Project:
         else:
             return self._get_resource_classes()[model](r[0])
 
+    def get_gate(self, name):
+        return self.get_resource("gate", name)
+
+    def get_importer(self, name):
+        return self.get_resource("importer", name)
+
+    def get_cleaner(self, name):
+        return self.get_resource("cleaner", name)
+
+    def get_analysis(self, name):
+        return self.get_resource("analysis", name)
+
     def data_scan(self):
-        client = get_client()
         resources = self.get_all_resources(["importer", "cleaner", "analysis"])
         df_project = pd.DataFrame()
         for resource_model, resources_list in resources.items():
@@ -180,7 +190,7 @@ class Project:
         passive=False
     ):
 
-        # Touchy imports
+        # Touchy import
         from . import Gate
 
         client = get_client()

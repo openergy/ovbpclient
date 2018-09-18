@@ -18,8 +18,9 @@ class Resource:
             raise ValueError("The info must contain at least 'id' and 'name' field")
 
     @classmethod
-    def retrieve(cls, model, organization_name=None, project_name=None, name=None, id=None):
+    def retrieve(cls, organization_name=None, project_name=None, name=None, id=None):
         client = get_client()
+        model = cls.__name__.lower()
         if id is None:
             if (organization_name is None) or (project_name is None) or (name is None):
                 raise ValueError("Please indicate at least an id or an organization name, a project name "

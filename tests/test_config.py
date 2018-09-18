@@ -49,7 +49,10 @@ class ConfigurationTest(unittest.TestCase):
             activate=True
         )
 
-        self.assertTrue(self.project.get_resource("gate", "Test Internal Gate") is not None)
+        self.assertTrue(self.project.get_gate("Test Internal Gate") is not None)
+
+        r = opdev.Gate.retrieve("Test Organization", "Test Project", "Test Internal Gate")
+        self.assertTrue(r is not None)
 
         self.internal_gate.get_detailed_info()
 
@@ -63,7 +66,10 @@ class ConfigurationTest(unittest.TestCase):
             password=self.internal_gate.ftp_account_password
         )
 
-        self.assertTrue(self.project.get_resource("gate", "Test External Gate") is not None)
+        self.assertTrue(self.project.get_gate("Test External Gate") is not None)
+
+        r = opdev.Gate.retrieve("Test Organization", "Test Project", "Test External Gate")
+        self.assertTrue(r is not None)
 
         # fill artificially a gate
         with ftputil.FTPHost(
@@ -89,35 +95,31 @@ class ConfigurationTest(unittest.TestCase):
             outputs_length=2
         )
 
-        self.assertTrue(self.project.get_resource("importer", "Test Importer") is not None)
+        self.assertTrue(self.project.get_importer("Test Importer") is not None)
         self.assertEqual(2, len(self.importer.get_outputs()))
 
-        # configure cleaner and activate it
-        def unit_cleaner_config_fct(se):
+        r = opdev.Importer.retrieve("Test Organization", "Test Project", "Test Importer")
+        self.assertTrue(r is not None)
+        print("r", r)
 
-            return opdev.get_unitcleaner_config(
-                external_name=se["external_name"],
-                name=se["external_name"],
+        # configure cleaner and activate it
+        def unitcleaners_config_fct(se):
+
+            return opdev.configure_unitcleaner(
                 freq="10T",
-                input_unit_type="instantaneous",
-                unit_type="instantaneous",
-                input_convention="left",
-                clock="gmt",
-                timezone="Europe/Paris",
-                unit=se["external_name"],
-                resample_rule="mean"
+                clock="gmt"
             )
 
-        self.cleaner = self.project.get_resource("cleaner", self.importer.name)
+        self.cleaner = self.project.get_cleaner(self.importer.name)
         self.cleaner.configure_all(
-            unitcleaner_config_fct=unit_cleaner_config_fct,
+            unitcleaners_config_fct=unitcleaners_config_fct,
             activate=True,
             waiting_for_outputs=True,
             outputs_length=2
         )
 
-        self.assertTrue(self.project.get_resource("cleaner", "Test Importer") is not None)
-        self.assertEqual(2, len(self.cleaner.get_outputs()))
+        r = opdev.Cleaner.retrieve("Test Organization", "Test Project", "Test Importer")
+        self.assertTrue(r is not None)
 
         # get analysis inputs_list
         self.inputs_list = self.cleaner.get_outputs()
@@ -161,8 +163,11 @@ class ConfigurationTest(unittest.TestCase):
             outputs_length=2
         )
 
-        self.assertTrue(self.project.get_resource("analysis", "Test Analysis") is not None)
+        self.assertTrue(self.project.get_analysis("Test Analysis") is not None)
         self.assertEqual(2, len(self.analysis.get_outputs()))
+
+        r = opdev.Analysis.retrieve("Test Organization", "Test Project", "Test Analysis")
+        self.assertTrue(r is not None)
 
         self.analysis.reset()
         self.assertEqual(2, len(self.analysis.get_outputs()))

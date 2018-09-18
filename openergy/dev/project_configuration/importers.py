@@ -1,5 +1,5 @@
 from openergy import get_client
-from . import Generator, Resource
+from . import Generator
 
 
 class Importer(Generator):
@@ -33,8 +33,11 @@ class Importer(Generator):
         config_params = {}
 
         if gate_name is not None:
-            config_params["gate"] = Resource.retrieve(
-                "gate",
+
+            # touchy import
+            from . import Gate
+
+            config_params["gate"] = Gate.retrieve(
                 self.get_organization().name,
                 self.get_project().name,
                 gate_name
