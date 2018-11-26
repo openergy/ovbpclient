@@ -12,12 +12,12 @@ class Cleaner(Generator):
         print("Impossible to delete a cleaner")
 
     def configure_all(
-            self,
-            unitcleaners_config_fct,
-            activate=True,
-            replace=False,
-            waiting_for_outputs=False,
-            outputs_length=0
+        self,
+        unitcleaners_config_fct,
+        activate=True,
+        replace=False,
+        waiting_for_outputs=False,
+        outputs_length=0
     ):
         """
         Parameters
@@ -26,6 +26,7 @@ class Cleaner(Generator):
         unitcleaners_config_fct: fct
             This function takes one input series resource as argument.
             You have to code this function so that it returns the configuration depending on each series
+            As input of the function, you get the external name of a serie and you have to return configure_unitcleaner(**args)
 
         activate: boolean, default True
             True -> The unticleaners get activated after creation
@@ -130,6 +131,17 @@ class Cleaner(Generator):
             self,
             external_name
     ):
+        """
+
+        Parameters
+        ----------
+        external_name: string
+
+        Returns
+        -------
+        A Series instance.
+
+        """
 
         client = get_client()
 
@@ -277,6 +289,39 @@ def configure_unitcleaner(
         custom_before_offset=None,
         custom_after_offset=None
 ):
+    '''
+
+    Parameters
+    ----------
+        name: string, default None
+    The name of the cleaned series. If None, the external_name is unsed
+
+    for the following params, see platform documentation at "https://platform.openergy.fr/docs/"
+
+    freq
+    input_unit_type
+    unit_type
+    input_convention
+    clock
+    timezone
+    unit
+    resample_rule
+    interpolate_limit
+    wait_offset
+    label
+    input_expected_regular
+    operation_fct
+    filter_fct
+    derivative_filter_fct
+    custom_delay
+    custom_fct
+    custom_before_offset
+    custom_after_offset
+
+    Returns
+    -------
+    Request params for unitcleaner configuration
+    '''
 
     data = {
         "name": name,

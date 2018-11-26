@@ -24,6 +24,46 @@ class Importer(Generator):
             outputs_length=0,
 
     ):
+        """
+        Parameters
+        ----------
+
+        name: string
+            The name of the importer
+
+        comment: string
+
+        gate_name: string
+            The name of the gate to read files in
+            Modifying the gate causes a reset of the importer outputs
+
+        parse_script: string
+            The full python script to parse the files
+            Modifying the gate causes a reset of the importer outputs
+
+
+
+        crontab: string
+            6 characters to set the execution frequency of the importer
+            (see https://platform.openergy.fr/docs/glossaire.html?highlight=crontab#crontab)
+
+        re_run_last_file: boolean, default False
+            Decides if the last file should be re-read by the importer at the beginning of each execution
+
+        activate: boolean, default True
+            True -> The importer get activated after update
+
+        wait_for_outputs: boolean, default False
+            True -> Wait for the outputs to be created. (With activate=True only)
+
+        outputs_length: int
+            The number of expected outputs.
+
+        Returns
+        -------
+
+        An Importer instance
+        """
 
         client = get_client()
 
@@ -70,4 +110,6 @@ class Importer(Generator):
                 if waiting_for_outputs and (outputs_length>0):
                     self.wait_for_outputs(outputs_length)
 
-        return self.get_detailed_info()
+        self.get_detailed_info()
+
+        print(f"Importer {self.name} has been successfully updated")

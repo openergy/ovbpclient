@@ -7,8 +7,43 @@ from . import Organization
 
 class Project:
 
+    def __init__(self, info):
+        '''
+
+        Parameters
+        ----------
+        info: dictionary
+            A dictionary that contains at least id and name keys
+        '''
+
+        if ("id" in info.keys()) and ("name" in info.keys()):
+            self._info = info
+            self.__dict__.update(info)
+        else:
+            raise ValueError("The info must contain at least 'id' and 'name' field")
+
     @classmethod
     def retrieve(cls, organization_name=None, name=None, id=None, odata=None):
+        '''
+        Retrieve project detailed info and create a Project instance.
+        You need to give either the organization's name and the project's name or the project id or the project odata id
+
+        Parameters
+        ----------
+        organization_name: string
+
+        name: string
+
+        id: uuid-string
+
+        odata: uuid-string
+
+        Returns
+        -------
+
+        The Project instance.
+
+        '''
         client = get_client()
         if id is None:
             if odata is None:
@@ -43,16 +78,15 @@ class Project:
 
         return cls(info)
 
-
-    def __init__(self, info):
-
-        if ("id" in info.keys()) and ("name" in info.keys()):
-            self._info = info
-            self.__dict__.update(info)
-        else:
-            raise ValueError("The info must contain at least 'id' and 'name' field")
-
     def get_detailed_info(self):
+        """
+
+        Returns
+        -------
+
+        A dictionary that contains all info about the Project
+
+        """
 
         client = get_client()
 
@@ -101,6 +135,20 @@ class Project:
 
     def get_all_resources(self, models=["gate", "importer", "cleaner", "analysis"]):
 
+        """
+        Retrieve several resources of the project
+
+        Parameters
+        ----------
+        models: array default ["gate", "importer", "cleaner", "analysis"] (All)
+            The models you want to retrieve.
+
+        Returns
+        -------
+        A dictionary with asked models as keys and the list of Resource Instances as values.
+
+        """
+
         classes = self._get_resource_classes()
         resources = {}
 
@@ -117,6 +165,22 @@ class Project:
         return resources
 
     def get_resource(self, model, name):
+        """
+        Retrieve a single resource of the project
+
+        Parameters
+        ----------
+        model: string
+            choices are "gate", "importer", "cleaner", "analysis"
+        name: string
+            The name of the resource
+
+        Returns
+        -------
+
+        A Resource Instance.
+
+        """
 
         r = get_full_list(
             get_odata_url(model),
@@ -132,18 +196,70 @@ class Project:
             return self._get_resource_classes()[model](r[0])
 
     def get_gate(self, name):
+        """
+
+        Parameters
+        ----------
+        name: gate name
+
+        Returns
+        -------
+        A Gate Instance.
+
+        """
         return self.get_resource("gate", name)
 
     def get_importer(self, name):
+        """
+
+        Parameters
+        ----------
+        name: importer name
+
+        Returns
+        -------
+        An Importer Instance.
+
+        """
         return self.get_resource("importer", name)
 
     def get_cleaner(self, name):
+        """
+
+        Parameters
+        ----------
+        name: cleaner name
+
+        Returns
+        -------
+        A Cleaner Instance.
+
+        """
         return self.get_resource("cleaner", name)
 
     def get_analysis(self, name):
+        """
+
+        Parameters
+        ----------
+        name: analysis name
+
+        Returns
+        -------
+        An Analysis Instance.
+
+        """
         return self.get_resource("analysis", name)
 
     def data_scan(self):
+        """
+
+
+        Returns
+        -------
+        A dataframe containing
+
+        """
         resources = self.get_all_resources(["importer", "cleaner", "analysis"])
         df_project = pd.DataFrame()
         for resource_model, resources_list in resources.items():
@@ -152,43 +268,109 @@ class Project:
                 df_project = pd.concat([df_project, df_res], ignore_index=True)
         return df_project
 
-    def check_last_files(self,paths_dict={}):
+    def check_last_files(self,paths_dict=None, all_gates=True, default_limit=10):
         """
         Parameters
         ----------
 
-        paths_dict: dictionary
+        paths_dict: dictionary, default None
             Keys: gates names
-            Values: List of path to check
+            Values: List of path and files limit
 
-            Example: {"gate1": ["path1", "path2"], "gate2": ["path1", "path2"]}
+            Example: {
+                "gate1": [
+                    {
+                        "path": "path1_1",
+                        "limit": limit1_1
+                    },
+                    {
+                        "path": "path1_2",
+                        "limit": limit1_2
+                    }
+                ],
+                "gate2": [
+                    {
+                        "path": "path2_1",
+                        "limit": limit2_1
+                    }
+                ]
+            }
+
+        all_gates: boolean, default True
+            Display the last files of project's gates (at root) even if not in the paths_dict
+
+        default_limit: integer, default 10
+            The number of displayed last files when not precised
 
         Returns
         -------
 
         The last files of each gate of the project as a dictionary
         """
+
+        if paths_dict is None:
+            paths_dict = {}
+
         gates_list = self.get_all_resources(models=["gate"])["gate"]
         last_files = {}
         for g in gates_list:
-            paths_list = ["/"]
             if g.name in paths_dict.keys():
-                paths_list = paths_dict[g.name]
-            for p in paths_list:
-                last_files[f"{g.name}@{p}"] = g.check_last_files(p)
+                for path_and_limit in paths_dict[g.name]:
+                    path =  path_and_limit.get("path", "/")
+                    limit = path_and_limit.get("limit", default_limit)
+                    last_files[f"{g.name}@{path}"] = g.check_last_files(path, limit)
+            else:
+                if all_gates:
+                    last_files[f"{g.name}@/"] = g.check_last_files("/", default_limit)
+
         return last_files
 
     def create_internal_gate(
         self,
         name,
-        timezone,
         crontab,
         script,
         comment="",
+        timezone="Europe/Paris",
         replace=False,
         activate=True,
         passive=False
     ):
+        """
+
+        You must have creation rights within the project
+
+        Parameters
+        ----------
+        name: string
+
+        crontab: string
+            6 characters to set the execution frequency of the importer
+            (see https://platform.openergy.fr/docs/glossaire.html?highlight=crontab#crontab)
+
+        script: string
+            The feeding script
+
+        comment: string
+            An optional comment
+
+        timezone: srting default "Europe/Paris"
+
+        replace: bool default False
+            replace if a gate with the same name already exists
+
+        activate: bool default True
+            activate the gate directly after creation
+
+        passive: bool default False
+            create a passive gate
+
+        Returns
+        -------
+
+        A Gate Instance
+
+        """
 
         # Touchy import
         from . import Gate
@@ -230,14 +412,49 @@ class Project:
     def create_external_gate(
             self,
             name,
-            host,
-            port,
-            protocol,
-            login,
+            custom_host,
+            custom_port,
+            custom_protocol,
+            custom_login,
             password,
             comment="",
             replace=False
     ):
+        """
+
+        You must have creation rights within the project
+
+        Parameters
+        ----------
+        name: string
+
+        host: string
+            The ftp host name
+
+        port: integer
+            The port number
+
+        protocol: string
+            "ftp", "sftp" or "ftps"
+
+        login: string
+            The login of your ftp credetials
+
+        password: string
+            The password of your ftp credentials
+
+        comment: string
+            An optional comment
+
+        replace: bool default False
+            replace a Gate with the same name already exists
+
+        Returns
+        -------
+
+        A Gate instance
+
+        """
 
         from . import Gate
 
@@ -266,12 +483,12 @@ class Project:
 
         gate = Gate(gate_info)
 
-        gate.update_external_ftp(
-            host,
-            port,
-            protocol,
-            login,
-            password,
+        gate.update_external(
+            custom_host=custom_host,
+            custom_port=custom_port,
+            custom_protocol=custom_protocol,
+            custom_login=custom_login,
+            password=password,
         )
 
         print(f"The gate {name} has been successfully created")
@@ -295,6 +512,9 @@ class Project:
             abort_time=180
     ):
         """
+
+        You must have creation rights within the project
+
         Parameters
         ----------
 
@@ -336,7 +556,7 @@ class Project:
         Returns
         -------
 
-        The created importer instance
+        An Importer instance
         """
 
         # Touchy import
@@ -413,6 +633,9 @@ class Project:
             outputs_length=0
     ):
         """
+
+        You must have creation rights within the project
+
         Parameters
         ----------
 
@@ -480,7 +703,7 @@ class Project:
         Returns
         -------
 
-        The analysis record that has been created
+        An Analysis Instance
         """
 
         #Touchy import

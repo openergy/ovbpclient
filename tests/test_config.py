@@ -54,15 +54,20 @@ class ConfigurationTest(unittest.TestCase):
         r = opdev.Gate.retrieve("Test Organization", "Test Project", "Test Internal Gate")
         self.assertTrue(r is not None)
 
-        self.internal_gate.get_detailed_info()
+        # update internal gate infos
+        self.internal_gate.update_internal(
+            name="Internal Gate Test",
+            crontab="1 1 1 * * *",
+            script="Gate Script Test"
+        )
 
         # create an external gate
         self.external_gate = self.project.create_external_gate(
             name="Test External Gate",
-            host=self.internal_gate.ftp_account["host"],
-            port=self.internal_gate.ftp_account["port"],
-            protocol=self.internal_gate.ftp_account["protocol"],
-            login=self.internal_gate.ftp_account["login"],
+            custom_host=self.internal_gate.ftp_account["host"],
+            custom_port=self.internal_gate.ftp_account["port"],
+            custom_protocol=self.internal_gate.ftp_account["protocol"],
+            custom_login=self.internal_gate.ftp_account["login"],
             password=self.internal_gate.ftp_account_password
         )
 
@@ -87,7 +92,7 @@ class ConfigurationTest(unittest.TestCase):
         # create an importer and activate it
         self.importer = self.project.create_importer(
             name="Test Importer",
-            gate_name="Test Internal Gate",
+            gate_name="Internal Gate Test",
             parse_script=parse_script,
             root_dir_path="/",
             crontab="0 0 0 * * *",
@@ -101,6 +106,13 @@ class ConfigurationTest(unittest.TestCase):
         r = opdev.Importer.retrieve("Test Organization", "Test Project", "Test Importer")
         self.assertTrue(r is not None)
         print("r", r)
+
+        # update importer infos
+        self.importer.update(
+            name="Importer Test",
+            parse_script=parse_script + "\n",
+            crontab="1 1 1 * * *"
+        )
 
         # configure cleaner and activate it
         def unitcleaners_config_fct(se):
@@ -118,7 +130,7 @@ class ConfigurationTest(unittest.TestCase):
             outputs_length=2
         )
 
-        r = opdev.Cleaner.retrieve("Test Organization", "Test Project", "Test Importer")
+        r = opdev.Cleaner.retrieve("Test Organization", "Test Project", "Importer Test")
         self.assertTrue(r is not None)
 
         # get analysis inputs_list
@@ -171,6 +183,11 @@ class ConfigurationTest(unittest.TestCase):
 
         self.analysis.reset()
         self.assertEqual(2, len(self.analysis.get_outputs()))
+
+        self.analysis.update(
+            input_freq="3H",
+            script=analysis_script + "\n"
+        )
 
         # test data_scan
         df = self.project.data_scan()

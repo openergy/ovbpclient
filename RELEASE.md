@@ -2,7 +2,8 @@
 
 (p): patch, (m): minor, (M): major
 
-## next
+## 3.6.0
+* m: possibility to update gates
 
 ## 3.5.0
 * m: possibility to deactivate all resources

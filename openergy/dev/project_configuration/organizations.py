@@ -4,6 +4,13 @@ from openergy import get_client, get_full_list
 class Organization:
 
     def __init__(self, info):
+        """
+
+        Parameters
+        ----------
+        info: dictionary
+            A dict that contains at least id and name as keys
+        """
 
         if ("id" in info.keys()) and ("name" in info.keys()):
             self._info = info
@@ -13,6 +20,25 @@ class Organization:
 
     @classmethod
     def retrieve(cls, name=None, id=None):
+        """
+        Retrieve organization detailed info and create Organization instance from this info.
+        The name or the id is enough, don't need both
+
+        Parameters
+        ----------
+        name: string
+            The name of the organization.
+
+        id: uuid string
+            The id of the organization
+
+        Returns
+        -------
+        
+        The Organization instance.
+
+        """
+
         client = get_client()
 
         if id is None:
@@ -39,6 +65,14 @@ class Organization:
         return cls(info)
 
     def get_detailed_info(self):
+        """
+
+        Returns
+        -------
+
+        A dictionary that contains all info about the Organization
+
+        """
 
         client = get_client()
 
@@ -52,9 +86,10 @@ class Organization:
         return self._info
 
     def delete(self):
+        """
+        You must be super Admin with can_delete right
 
-        # You must be super Admin with can_delete right
-
+        """
         name = self.name
 
         client = get_client()
@@ -72,6 +107,18 @@ class Organization:
         print(f"The organization {name} has been successfully deleted")
 
     def get_project(self, project_name):
+        """
+        Retrieve a project within the Organization
+        
+        Parameters
+        ----------
+        project_name: string 
+
+        Returns
+        -------
+        
+        The Project Instance
+        """
 
         # Touchy import
         from . import Project
@@ -87,7 +134,9 @@ class Organization:
         )["data"]
 
         if len(r) == 0:
+            print(f"No project named {project_name} in organization {self.name}")
             return
+            # raise ValueError(f"No project named {project_name} in organization {self._info.name}")
         else:
             return Project(r[0])
 
@@ -98,6 +147,25 @@ class Organization:
             display_buildings=True,
             replace=False
     ):
+        """
+
+        You must have creation rights within the organization
+
+        Parameters
+        ----------
+        project_name: string
+
+        project_comment: string
+
+        display_buildings: bool
+
+        replace: bool
+            replace by a new one if a project with the same name already exists
+
+        Returns
+        -------
+
+        """
 
         # Touchy import
         from . import Project
@@ -131,6 +199,14 @@ class Organization:
         return Project(new_project_info)
 
     def get_all_projects(self):
+        """
+
+        Returns
+        -------
+
+        The list of all projects (as Project instances) within the Organization.
+
+        """
 
         r = get_full_list(
             "oteams/projects",
@@ -146,6 +222,19 @@ class Organization:
 
 
 def create_organization(name):
+    """
+    You must have super admin rights can_create_organization
+
+    Parameters
+    ----------
+    name: string
+
+    Returns
+    -------
+
+    The instance of the Organization just created
+
+    """
     client = get_client()
     r = client.create(
         "oteams/organization",
@@ -157,7 +246,14 @@ def create_organization(name):
 
 
 def get_my_organizations():
-    client = get_client()
+    """
+
+    Returns
+    -------
+
+    All the organizations you belong to
+
+    """
     r = get_full_list(
         "oteams/organizations"
     )
