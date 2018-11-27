@@ -103,6 +103,29 @@ class Project:
     def get_organization(self):
         return Organization.retrieve(self.organization["id"])
 
+    def update(
+        self,
+        name=None,
+        comment=None,
+        display_buildings=None,
+    ):
+
+        args = ["name", "comment", "display_buildings"]
+        params = {}
+        for arg in args:
+            if locals()[arg] is not None:
+                params[arg] = locals()[arg]
+
+        if len(params.keys()) > 0:
+            client = get_client()
+            client.partial_update(
+                "oteams/projects",
+                self.id,
+                data=params
+            )
+
+        self.get_detailed_info()
+
     def delete(self):
 
         client = get_client()
@@ -191,6 +214,7 @@ class Project:
         )
 
         if len(r) == 0:
+            print(f"No {model} named {name} found in project {self.name}")
             return None
         else:
             return self._get_resource_classes()[model](r[0])
@@ -334,6 +358,9 @@ class Project:
         timezone="Europe/Paris",
         replace=False,
         activate=True,
+        waiting_for_a_file=False,
+        sleep_loop_time=15,
+        abort_time=180,
         passive=False
     ):
         """
@@ -404,8 +431,13 @@ class Project:
             base_feeder = gate.create_base_feeder(timezone, crontab)
             base_feeder.create_generic_basic_feeder(script)
             if activate:
-                base_feeder.activate()
+                gate.activate()
                 print(f"The gate {name} has been successfully activated")
+
+                if waiting_for_a_file:
+                        gate.wait_for_a_file(sleep_loop_time, abort_time)
+
+
 
         return gate
 
@@ -481,6 +513,8 @@ class Project:
             }
         )
 
+        print(f"The gate {name} has been successfully created")
+
         gate = Gate(gate_info)
 
         gate.update_external(
@@ -490,8 +524,6 @@ class Project:
             custom_login=custom_login,
             password=password,
         )
-
-        print(f"The gate {name} has been successfully created")
 
         return gate
 
@@ -509,7 +541,8 @@ class Project:
             waiting_for_outputs=False,
             outputs_length=0,
             sleep_loop_time=15,
-            abort_time=180
+            abort_time=180,
+            waiting_for_cleaner_inputs=False
     ):
         """
 
@@ -547,11 +580,14 @@ class Project:
             True -> If an importer with the same name already exists, it gets deleted and a new one get created
             False ->  If an importer with the same name already exists, a message informs you and nothing get created
 
-        wait_for_outputs: boolean, default False
+        waiting_for_outputs: boolean, default False
             True -> Wait for the outputs to be created. (With activate=True only)
 
         outputs_length: int
             The number of expected outputs.
+
+        waiting_for_cleaner_inputs: boolean, default False
+            Wait for cleaner inputs to be ready
 
         Returns
         -------
@@ -585,6 +621,8 @@ class Project:
             }
         )
 
+        print(f"The importer {name} has been successfully created")
+
         importer = Importer(importer_info)
 
         importer.update(
@@ -596,14 +634,16 @@ class Project:
             activate=False
         )
 
-        print(f"The importer {name} has been successfully created")
-
         if activate:
             importer.activate()
             print(f"The importer {name} has been successfully activated")
 
             if waiting_for_outputs and outputs_length>0:
                 importer.wait_for_outputs(outputs_length, sleep_loop_time, abort_time)
+
+                if waiting_for_cleaner_inputs:
+                     importer.wait_for_cleaner_inputs(outputs_length, sleep_loop_time, abort_time)
+
 
         return importer
 
@@ -732,6 +772,8 @@ class Project:
             }
         )
 
+        print(f"The analysis {name} has been successfully created")
+
         analysis = Analysis(analysis_info)
 
         # inputs
@@ -778,8 +820,6 @@ class Project:
                 "odata/analysis_outputs",
                 data=output_config
             )
-
-        print(f"The analysis {name} has been successfully created")
 
         if activate:
             analysis.activate()

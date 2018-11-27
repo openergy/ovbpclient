@@ -34,6 +34,13 @@ def get_full_list(url, params={}):
             params=params
         )["data"]
 
+        # from pprint import pprint
+        # print("url", url)
+        # print("params")
+        # pprint(params)
+        # print("r")
+        # pprint(r)
+
         if len(r) == 0:
             return full_list
 

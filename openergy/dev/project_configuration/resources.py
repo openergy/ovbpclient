@@ -90,4 +90,4 @@ class Resource:
 
         self._info = None
 
-        print(f"The project {name} has been successfully deleted")
+        print(f"{name} has been successfully deleted")

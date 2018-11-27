@@ -1,4 +1,7 @@
-from openergy import get_client
+import datetime as dt
+import time
+
+from openergy import get_client, get_full_list
 from . import Generator
 
 
@@ -19,10 +22,11 @@ class Importer(Generator):
             root_dir_path=None,
             crontab=None,
             re_run_last_file=None,
+            last_imported_path=None,
             activate=True,
             waiting_for_outputs=False,
             outputs_length=0,
-
+            waiting_for_cleaner_inputs=False
     ):
         """
         Parameters
@@ -77,11 +81,13 @@ class Importer(Generator):
             # touchy import
             from . import Gate
 
-            config_params["gate"] = Gate.retrieve(
+            gate = Gate.retrieve(
                 self.get_organization().name,
                 self.get_project().name,
                 gate_name
-            ).id
+            )
+
+            config_params["gate"] = gate.id
         if parse_script is not None:
             config_params["parse_script"] = parse_script
         if root_dir_path is not None:
@@ -107,9 +113,106 @@ class Importer(Generator):
             if activate:
                 self.activate()
 
-                if waiting_for_outputs and (outputs_length>0):
+                if waiting_for_outputs and (outputs_length>0) and (len(gate.list_dir())>0):
                     self.wait_for_outputs(outputs_length)
+
+                    if waiting_for_cleaner_inputs:
+                        self.wait_for_cleaner_inputs(outputs_length)
 
         self.get_detailed_info()
 
         print(f"Importer {self.name} has been successfully updated")
+
+    def run(self):
+
+         client = get_client()
+
+         client.detail_route(
+             "odata/importers",
+             self.id,
+             "POST",
+             "action",
+             data={"name":"run"}
+         )
+
+    def reset(
+            self,
+            partial_instant=None,
+            last_imported_path=None,
+            waiting_for_outputs=False,
+            outputs_lentgh = 0,
+            waiting_for_cleaner_inputs=False
+    ):
+        """
+        Parameters
+        ----------
+
+        partial_instant: string (date in iso format) default None
+            The date from which the outputs are reset.
+            If None, full reset.
+
+        waiting_for_outputs
+
+        """
+
+        client = get_client()
+
+        if last_imported_path is not None:
+            client.partial_update(
+                "odata/importers",
+                self.id,
+                data={"last_imported_path": last_imported_path}
+            )
+
+        data = {"name": "reset"}
+
+        if partial_instant is not None:
+            data["partial_instant"] = partial_instant
+
+        client.detail_route(
+            "odata/importers",
+            self.id,
+            "POST",
+            "action",
+            data=data
+        )
+
+        if waiting_for_outputs and (outputs_lentgh > 0):
+            self.wait_for_outputs(outputs_lentgh)
+
+            if waiting_for_cleaner_inputs:
+                self.wait_for_cleaner_inputs(outputs_lentgh)
+
+    def wait_for_cleaner_inputs(
+        self,
+        outputs_length,
+        sleep_loop_time=15,
+        abort_time=180
+    ):
+
+        client = get_client()
+
+        cleaner_inputs_ready = False
+        start_time = dt.datetime.now()
+
+        while not cleaner_inputs_ready:
+
+            if (dt.datetime.now() - start_time) < dt.timedelta(seconds=abort_time):
+
+                print('Waiting for cleaner inputs...')
+                time.sleep(sleep_loop_time)
+
+                importer_series = get_full_list(
+                    "/odata/importer_series/",
+                    params={"generator": self.id}
+                )
+
+                print(f"{len(importer_series)} cleaner inputs generated over {outputs_length} expected")
+
+                if len(importer_series) == outputs_length:
+                    print(f"Cleaner inputs are ready \n\n")
+                    return
+
+            else:
+                print("Abort time exceeded. Exit")
+                return

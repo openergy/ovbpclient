@@ -46,6 +46,8 @@ class Cleaner(Generator):
         print(f"Configuration of cleaner {self.name}")
 
         # retrieve unitcleaners
+
+
         importer_series = get_full_list(
             "/odata/importer_series/",
             params={"generator": self.related_importer}
@@ -90,7 +92,9 @@ class Cleaner(Generator):
         if waiting_for_outputs and (outputs_length>0):
             self.wait_for_outputs(outputs_length)
 
-        return self.get_detailed_info()
+        self.get_detailed_info()
+
+        print(f"The cleaner {self.name} has successfully been configured")
 
     def clear_all_configurations(self):
 

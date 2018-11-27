@@ -196,7 +196,9 @@ class Organization:
 
         print(f"The project {project_name} has been successfully created")
 
-        return Project(new_project_info)
+        project_created = Project(new_project_info)
+        project_created.get_detailed_info()
+        return project_created
 
     def get_all_projects(self):
         """

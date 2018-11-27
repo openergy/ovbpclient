@@ -4,6 +4,7 @@
 
 ## 3.6.0
 * m: possibility to update gates
+* m: waiting for cleaner inputs available in create importer
 
 ## 3.5.0
 * m: possibility to deactivate all resources

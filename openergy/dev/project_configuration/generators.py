@@ -51,12 +51,7 @@ class Generator(Resource, ActivationMixin):
                 print('Waiting for outputs...')
                 time.sleep(sleep_loop_time)
 
-                outputs = get_full_list(
-                    "odata/series",
-                    params={
-                        "generator": self.id
-                    }
-                )
+                outputs = self.get_outputs()
 
                 print(f"{len(outputs)} outputs generated over {outputs_length} expected")
 
@@ -74,42 +69,12 @@ class Generator(Resource, ActivationMixin):
 
         self.deactivate()
 
-        too_long = False
+        outputs = self.get_outputs()
 
-        print(f"Clearing outputs before deleting")
-
-        clear = client.detail_route(
-            get_odata_url(self.model),
-            self.id,
-            "POST",
-            "action",
-            data={"name": "clear"}
-        )
-
-        clear_task_status = "pending"
-        clear_start = dt.datetime.now()
-
-        end_status = ["finished", "failed", "server_error", "refused"]
-
-        while clear_task_status not in end_status and not too_long:
-            now = dt.datetime.now()
-            if (now - clear_start) > dt.timedelta(seconds=time_limit):
-                too_long = True
-                print("Clear operation took too long. Aborting deletion")
-                continue
-
-            time.sleep(10)
-            clear_task = client.retrieve(
-                get_odata_url(f"{self.model}_task"),
-                clear["id"],
-            )
-
-            clear_task_status = clear_task["base"]["status"]
-            print(f"Clear status : {clear_task_status}")
-
-        if not too_long:
+        if len(outputs) == 0:
 
             name = self.name
+            model = self.model
 
             client.destroy(
                 get_odata_url(self.model),
@@ -121,7 +86,57 @@ class Generator(Resource, ActivationMixin):
 
             self._info = None
 
-            print(f"The {self.model} {name} has been successfully deleted")
+            print(f"The {model} {name} has been successfully deleted")
+
+        else:
+
+            too_long = False
+            print(f"Clearing outputs before deleting")
+
+            clear = client.detail_route(
+                get_odata_url(self.model),
+                self.id,
+                "POST",
+                "action",
+                data={"name": "clear"}
+            )
+
+            clear_task_status = "pending"
+            clear_start = dt.datetime.now()
+
+            end_status = ["finished", "failed", "server_error", "refused"]
+
+            while clear_task_status not in end_status and not too_long:
+                now = dt.datetime.now()
+                if (now - clear_start) > dt.timedelta(seconds=time_limit):
+                    too_long = True
+                    print("Clear operation took too long. Aborting deletion")
+                    continue
+
+                time.sleep(10)
+                clear_task = client.retrieve(
+                    get_odata_url(f"{self.model}_task"),
+                    clear["id"],
+                )
+
+                clear_task_status = clear_task["base"]["status"]
+                print(f"Clear status : {clear_task_status}")
+
+            if not too_long:
+
+                name = self.name
+
+                client.destroy(
+                    get_odata_url(self.model),
+                    self.id
+                )
+
+                for k in self._info.keys():
+                    setattr(self, k, None)
+
+                self._info = None
+
+                print(f"The {self.model} {name} has been successfully deleted")
 
     def data_scan(self):
         outputs = self.get_outputs()

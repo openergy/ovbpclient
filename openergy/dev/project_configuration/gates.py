@@ -1,3 +1,6 @@
+import datetime as dt
+import time
+
 from openergy import get_client, get_full_list
 
 from . import Resource, ActivationMixin
@@ -40,9 +43,24 @@ class Gate(Resource):
         self.get_detailed_info()
         if self._info["base_feeder"] is not None:
             return BaseFeeder(self._info["base_feeder"])
+
+    def run(self):
+
+        if self.get_base_feeder() is None:
+
+            print("No feeder configured, can't run")
+
         else:
-            print(f"Gate {self._info['name']} has no base_feeder")
-            return
+
+            client = get_client()
+
+            client.detail_route(
+                "odata/base_feeders",
+                self.base_feeder["id"],
+                "POST",
+                "feed",
+                data={}
+            )
 
     def deactivate(self):
         base_feeder = self.get_base_feeder()
@@ -53,6 +71,7 @@ class Gate(Resource):
         base_feeder = self.get_base_feeder()
         if base_feeder is not None:
             base_feeder.activate()
+            self.run()
 
     def update_general(
         self,
@@ -86,6 +105,7 @@ class Gate(Resource):
             data=params
         )
 
+        self.get_detailed_info()
 
     def update_internal(
         self,
@@ -228,7 +248,7 @@ class Gate(Resource):
 
         print(f"The gate {self.name} has been successfully updated")
 
-    def list_dir(self, path="/"):
+    def list_dir(self, path="/", full=False):
 
         """
         List files in the FTP directory
@@ -243,14 +263,50 @@ class Gate(Resource):
         List of files in the specified directory
 
         """
+        if full:
+            return get_full_list(
+                f"odata/gate_ftp_accounts/{self.ftp_account['id']}/list_dir/",
+                params={"path": path}
+            )
+        else:
+            client = get_client()
 
-        return get_full_list(
-            f"odata/gate_ftp_accounts/{self.ftp_account['id']}/list_dir/",
-            params={"path": path}
-        )
+            return client.detail_route(
+                "odata/gate_ftp_accounts/",
+                self.ftp_account["id"],
+                "GET",
+                "list_dir",
+                data={}
+            )["data"]
+
+    def wait_for_a_file(
+        self,
+        sleep_loop_time=15,
+        abort_time=180
+    ):
+
+        start_time = dt.datetime.now()
+
+        while not len(self.list_dir())>0:
+
+            if (dt.datetime.now() - start_time) < dt.timedelta(seconds=abort_time):
+
+                print('Waiting for a file...')
+                time.sleep(sleep_loop_time)
+
+                list_dir = self.list_dir()
+
+                print(f"{len(list_dir)} files in the gate")
+
+                if len(list_dir) > 0:
+                    return
+
+            else:
+                print("Abort time exceeded. Exit")
+                return
 
     def check_last_files(self, path="/", limit=20):
-        dir_list = self.list_dir(path)
+        dir_list = self.list_dir(path, full=True)
         files_list = [d["name"] for d in dir_list if d["type"]=="file"]
         files_list.sort(reverse=True)
         return files_list[:limit]
@@ -331,9 +387,6 @@ class BaseFeeder(ActivationMixin):
 
         if self._info["child_model"] != "generic_basic_feeder":
             return GenericBasicFeeder({"id": self._info["child_id"]})
-        else:
-            print(f"BaseFeeder {self._info['name']} has no generic_basic_feeder")
-            return
 
     def update(
         self,

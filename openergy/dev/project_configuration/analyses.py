@@ -159,7 +159,7 @@ class Analysis(Generator):
             if waiting_for_outputs and (outputs_lentgh>0):
                 self.wait_for_outputs(outputs_lentgh)
 
-        return self.get_detailed_info()
+        self.get_detailed_info()
 
     def reset(
             self,

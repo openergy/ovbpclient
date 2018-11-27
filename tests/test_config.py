@@ -119,10 +119,11 @@ class ConfigurationTest(unittest.TestCase):
 
             return opdev.configure_unitcleaner(
                 freq="10T",
-                clock="gmt"
+                clock="gmt",
             )
 
         self.cleaner = self.project.get_cleaner(self.importer.name)
+
         self.cleaner.configure_all(
             unitcleaners_config_fct=unitcleaners_config_fct,
             activate=True,
