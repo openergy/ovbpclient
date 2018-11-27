@@ -2,6 +2,8 @@
 
 (p): patch, (m): minor, (M): major
 
+## next
+
 ## 3.6.0
 * m: possibility to update gates
 * m: waiting for cleaner inputs available in create importer
