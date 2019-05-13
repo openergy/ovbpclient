@@ -2,7 +2,9 @@
 
 (p): patch, (m): minor, (M): major
 
-## next
+## 3.6.1
+* p: on get_series_data, warn the user when the series are cut by the server 
+(it outputs a maximum of 1.000.000 points per requests)
 
 ## 3.6.0
 * m: possibility to update gates

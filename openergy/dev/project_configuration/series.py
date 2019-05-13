@@ -1,3 +1,5 @@
+import warnings
+
 import pandas as pd
 
 from openergy import get_client
@@ -55,6 +57,9 @@ def get_series_data(
     if dropna:
         params["dropna"] = True
 
+    # This is the maximum number of points the API will return per series
+    max_points_per_series = int(1e6) // len(series_pk_list)
+
     series_data = client.list_route(
         "odata/series",
         "POST",
@@ -62,6 +67,18 @@ def get_series_data(
         params=params,
         data={"otsdb_pk": series_pk_list}
     )
+    cut = False
+    for se_dict in series_data.values():
+        if len(se_dict["index"]) == max_points_per_series:
+            cut = True
+    if cut:
+        warnings.warn(
+            "You requested more data than allowed on the platform (maximum number of points: 1.000.000).\n"
+            f"This caused the series returned here to be cut to a maximum of {max_points_per_series} points.\n"
+            "To get the full results, please launch an import (recommended) or split your current request into "
+            "several smaller requests (query a smaller number of series at a time, or use the start and end arguments)",
+            stacklevel=2
+        )
 
     if not return_df:
         return series_data
