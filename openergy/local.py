@@ -9,7 +9,7 @@ import pandas as pd
 from slugify import slugify
 
 from .outil import mkdir
-from .outil.async import SyncWrapper
+from .outil.asyncio import SyncWrapper
 
 from openergy import get_client, get_series_info
 
@@ -217,7 +217,7 @@ class LocalSeries:
 
     @property
     def data(self):
-        se = self.get_se_io().select()
+        se = self.get_sync_se_io().select()
         se.name = self.name  # todo: manage tags
         return se
 
