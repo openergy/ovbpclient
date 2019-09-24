@@ -23,6 +23,9 @@ setup(
         "Natural Language :: French",
         "Operating System :: POSIX :: Linux",
         "Programming Language :: Python :: 3.4",
+        "Programming Language :: Python :: 3.5",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
     ],
     package_data={'openergy': ['*.txt']},
     include_package_data=True

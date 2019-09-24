@@ -2,7 +2,8 @@
 
 (p): patch, (m): minor, (M): major
 
-## next
+## 3.6.2
+* p: support python 3.7
 
 ## 3.6.1
 * p: on get_series_data, warn the user when the series are cut by the server 
