@@ -9,7 +9,7 @@ import ovbpclient
 from ..base import BaseModel
 from ...exceptions import RecordDoesNotExistError
 
-module_path = os.path.realpath(ovbpclient)
+module_path = os.path.realpath(ovbpclient.__file__)
 
 
 class Cleaner(BaseModel):

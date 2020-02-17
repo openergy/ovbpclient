@@ -11,6 +11,7 @@ def check_rep(rep):
 
 
 def rep_to_json(rep):
+    check_rep(rep)
     # we use our json loads for date parsing
     return json_loads(rep.text)
 
@@ -21,20 +22,17 @@ class RestClient:
     def __init__(
             self,
             host,
-            credentials=None,
-            port=443,
+            login,
+            password,
             verify_ssl=True
     ):
         """
         credentials: login, password
         """
-        if "http" not in host:
-            host = "http://%s" % host
-
-        self.base_url = "%s:%s" % (host, port)
+        # todo: manage non https connexions
+        self.base_url = host.strip("/")
         self.session = requests.Session()
-        if credentials is not None:
-            self.session.auth = credentials
+        self.session.auth = (login, password)
         self.verify_ssl = verify_ssl
 
     def list(self, endpoint, params=None):

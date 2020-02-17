@@ -4,7 +4,7 @@ from .exceptions import RecordDoesNotExistError, MultipleRecordsReturnedError
 from .models import BaseModel
 
 
-class Queryset:
+class Queryset:  # todo: type queryset ?
     def __init__(self, records):
         self.records_by_id = collections.OrderedDict((r.id, r) for r in records)
 
@@ -22,7 +22,7 @@ class Queryset:
             filter(filter_by, self.records_by_id.values())
         return Queryset(iterator)
 
-    def one(self, filter_by=None) -> BaseModel:
+    def one(self, filter_by=None):
         if isinstance(filter_by, (str, int)):
             try:
                 return self.records_by_id[filter_by]

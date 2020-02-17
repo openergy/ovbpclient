@@ -1,9 +1,10 @@
-from ..endpoints import BaseEndpoint
 
 
 class BaseModel:
-    def __init__(self, endpoint: BaseEndpoint, data):
-        self.endpoint = endpoint
+    def __init__(self, endpoint, data):
+        # touchy imports
+        from ovbpclient.endpoints import BaseEndpoint
+        self.endpoint: BaseEndpoint = endpoint
         self.client = self.endpoint.client
         self.data = data
 
@@ -13,7 +14,13 @@ class BaseModel:
         return self.data[item]
 
     def __repr__(self):
-        return f"<{self.__class__.__name__}: {self.id}>"
+        msg = f"<{self.__class__.__name__}: "
+        try:
+            name = self.name
+            msg += f"{name} ({self.id})>"
+        except AttributeError:
+            msg += f"{self.id}>"
+        return msg
 
     def reload(self):
         reloaded_data = self.endpoint.client.rest_client.retrieve(self.endpoint.path, self.id)

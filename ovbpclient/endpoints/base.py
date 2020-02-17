@@ -22,18 +22,16 @@ class BaseEndpoint:
             filter_by=None,
             order_by=None
     ) -> Queryset:
-        # todo: manage parameters
         params = dict(start=start, limit=limit)
         if filter_by is not None:
-            # todo: code
-            pass
+            params.update(filter_by)
         if order_by is not None:
             # todo: code
             pass
         data_l = self.client.rest_client.list(
             self.path,
             params=params
-        )
+        )["data"]
         return Queryset([self.data_to_record(data) for data in data_l])
 
     def iter(self, filter_by=None, order_by=None):

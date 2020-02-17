@@ -8,14 +8,16 @@ class Client:
     def __init__(
             self,
             host,
-            credentials=None,
+            login,
+            password,
             port=443,
             verify_ssl=True
     ):
+        # todo: manage credentials properly
         self.rest_client = RestClient(
             host,
-            credentials=credentials,
-            port=port,
+            login,
+            password,
             verify_ssl=verify_ssl
         )
 
@@ -28,6 +30,12 @@ class Client:
             self,
             "oteams/projects",
             model_cls=oteams_models.Project
+        )
+
+        # odata - projects
+        self.odata_projects = BaseEndpoint(
+            self,
+            "odata/projects"
         )
 
         # odata - gates
@@ -95,7 +103,7 @@ class Client:
         )
 
     # --- organization
-    def get_organization_by_name(self, name):
+    def get_organization_by_name(self, name) -> "oteams_models.Organization":
         # todo: check name
         orgs_qs = self.organizations.list(limit=2, filter_by=dict(name=name))
         return orgs_qs.one()
