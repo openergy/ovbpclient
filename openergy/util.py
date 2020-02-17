@@ -24,7 +24,7 @@ def get_odata_url(record):
         return f"odata/{record}s"
 
 
-def get_full_list(url, params={}):
+def get_full_list(url, params={}):  # todo: this dict shouldn't be here...
     client = get_client()
 
     def get_data(start, full_list):
@@ -112,7 +112,7 @@ def select_series(uuid, **select_kwargs):
     series_id, name = info["id"], info["name"]
 
     # select data
-    rep = client.detail_route("odata/series", series_id, "GET", "select", params=select_kwargs, return_json=False)
+    rep = client.detail_action("odata/series", series_id, "GET", "select", params=select_kwargs, return_json=False)
 
     # transform to pandas series
     se = pd.read_json(rep, orient="split", typ="series")

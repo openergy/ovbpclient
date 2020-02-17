@@ -13,7 +13,7 @@ class ActivationMixin:
 
         client = get_client()
 
-        client.detail_route(
+        client.detail_action(
             get_odata_url(self.activable_object_model),
             self.activable_object_id,
             "PATCH",
@@ -25,7 +25,7 @@ class ActivationMixin:
 
         client = get_client()
 
-        client.detail_route(
+        client.detail_action(
             get_odata_url(self.activable_object_model),
             self.activable_object_id,
             "PATCH",

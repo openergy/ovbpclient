@@ -60,7 +60,7 @@ def get_series_data(
     # This is the maximum number of points the API will return per series
     max_points_per_series = int(1e6) // len(series_pk_list)
 
-    series_data = client.list_route(
+    series_data = client.list_action(
         "odata/series",
         "POST",
         "multi_select",
@@ -77,7 +77,7 @@ def get_series_data(
             f"This caused the series returned here to be cut to a maximum of {max_points_per_series} points.\n"
             "To get the full results, please launch an import (recommended) or split your current request into "
             "several smaller requests (query a smaller number of series at a time, or use the start and end arguments)",
-            stacklevel=2
+            stacklevel=1
         )
 
     if not return_df:

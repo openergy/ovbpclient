@@ -1,8 +1,8 @@
 import os
 import json
 import logging
-import hashlib
 import textwrap
+import shutil
 
 import pandas as pd
 
@@ -10,13 +10,16 @@ from slugify import slugify
 
 from .outil import mkdir
 from .outil.async import SyncWrapper
+from .outil.datetime import ISO_FORMAT
 
 from openergy import get_client, get_series_info
 
 try:
-    from otimeframes import SingleKeyHDFSeriesIO
+    from otimeframes import BlobStoreHyperSeriesIO, LocalBlobStore
+    IncompleteLocalSeriesIO = None
 except ImportError:
-    SingleKeyHDFSeriesIO = None
+    BlobStoreHyperSeriesIO = None
+    LocalBlobStore = None
     from .series_io import IncompleteLocalSeriesIO
 
 logger = logging.getLogger(__name__)
@@ -30,14 +33,13 @@ META_FIELDS = (  # except name
 
 
 class LocalDatabase:
-    def __init__(self, base_path, storage_format="single-key-hdf"):
+    def __init__(self, base_path):
         # checks
-        assert os.path.isdir(base_path), "base path does not exist: %s" % base_path
-        assert storage_format in ("single-key-hdf",), "unknown storage format: %s" % storage_format
+        if not os.path.isdir(base_path):
+            raise NotADirectoryError(f"directory does not exist {base_path}")
 
         # store variables
         self.base_path = base_path
-        self.storage_format = storage_format
 
     def get_local_series(self, project_name, generator_model, generator_name, name):
         """
@@ -231,7 +233,7 @@ class LocalSeries:
 
     @property
     def data_path(self):
-        return self.base_path + ".hdf"
+        return self.base_path + "[data]"
 
     @property
     def has_data(self):
@@ -276,11 +278,12 @@ class LocalSeries:
         )
 
     def get_se_io(self):
-        if SingleKeyHDFSeriesIO is not None:  # use otimeframes series_io
+        if BlobStoreHyperSeriesIO is not None:  # use otimeframes series_io
             meta = self.get_meta()
-            return SingleKeyHDFSeriesIO(
+            return BlobStoreHyperSeriesIO(
                 self.name,
-                self.data_path,
+                self.name,  # we use name as pk
+                LocalBlobStore(self.data_path),
                 freq=meta["freq"],
                 native_clock=meta["native_clock"],
                 timezone=meta["timezone"],
@@ -288,6 +291,17 @@ class LocalSeries:
                 default_resample_rules=meta["default_resample_rules"],
                 default_max_acceptable_delay="6H",  # todo !! (must update opmodels and oplatform first)
             )
+
+            # return SingleKeyHDFSeriesIO(
+            #     self.name,
+            #     self.data_path,
+            #     freq=meta["freq"],
+            #     native_clock=meta["native_clock"],
+            #     timezone=meta["timezone"],
+            #     tags=[],
+            #     default_resample_rules=meta["default_resample_rules"],
+            #     default_max_acceptable_delay="6H",  # todo !! (must update opmodels and oplatform first)
+            # )
 
         # use incomplete local series io
         return IncompleteLocalSeriesIO(
@@ -315,10 +329,12 @@ class LocalSeries:
 
         # erase existing data
         erased = False
-        for path in (self.data_path, self.meta_path):
-            if os.path.exists(path):
-                erased = True
-                os.remove(path)
+        if os.path.exists(self.data_path):
+            erased = True
+            shutil.rmtree(self.data_path)
+        if os.path.exists(self.meta_path):
+            erased = True
+            os.remove(self.meta_path)
         if erased:
             logger.warning(
                 "series %s was already in database, existing data was erased (%s)" % (self.name, self.base_path))
@@ -329,18 +345,47 @@ class LocalSeries:
         # write meta
         self.set_meta(**dict([(k, info[k]) for k in META_FIELDS]))
 
-        # select data
-        rep = client.detail_route("odata/series", info["id"], "GET", "select", return_json=False)
-
-        # transform to pandas series
-        se = pd.read_json(rep, orient="split", typ="series")
-        #
-        # # put storage name
-        # se.name = self.storage_name
-
-        # write data
+        # prepare se io
         sync_se_io = SyncWrapper(self.get_se_io())
-        sync_se_io.append(se)
+
+        # iter until no more data
+        last_end = None
+        while True:
+            # prepare params if necessary
+            if last_end is None:
+                params = None
+            else:
+                params = dict(
+                    start=last_end.strftime(ISO_FORMAT),  # todo: should be managed lower level
+                    closed="right"
+                )
+
+            # select data
+            rep = client.detail_action(
+                "odata/series",
+                info["id"],
+                "GET",
+                "select",
+                params=params,
+                return_json=False
+            )
+
+            # transform to pandas series
+            se = pd.read_json(rep, orient="split", typ="series", convert_dates=False)
+
+            # quit if empty
+            if len(se) == 0:
+                break
+
+            # ensure freq if more than one value
+            if len(se) > 1:
+                se = se.asfreq(pd.infer_freq(se.index))
+
+            # append
+            sync_se_io.append(se)
+
+            # store last end
+            last_end = se.index[-1]
 
     def __str__(self):
         if os.path.exists(self.meta_path):

@@ -93,7 +93,7 @@ class Generator(Resource, ActivationMixin):
             too_long = False
             print(f"Clearing outputs before deleting")
 
-            clear = client.detail_route(
+            clear = client.detail_action(
                 get_odata_url(self.model),
                 self.id,
                 "POST",

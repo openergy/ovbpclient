@@ -186,7 +186,7 @@ class Analysis(Generator):
         if partial_instant is not None:
             data["partial_instant"] = partial_instant
 
-        client.detail_route(
+        client.detail_action(
             "odata/analyses",
             self.id,
             "POST",

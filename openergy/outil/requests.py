@@ -112,7 +112,8 @@ class RESTClient(RequestsClient):
                      send_json=True):
         resource = resource.strip("/")
         rep = getattr(self.session, http_method.lower())(
-            "%s/%s/%s/%s/" % (self.base_endpoint_url, resource, resource_id, method_name), params=params,
+            "%s/%s/%s/%s/" % (self.base_endpoint_url, resource, resource_id, method_name),
+            params=params,
             json=data if send_json else None,
             data=None if send_json else data,
             verify=self.verify_ssl

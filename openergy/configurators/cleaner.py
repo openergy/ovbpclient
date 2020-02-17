@@ -275,7 +275,7 @@ class CleanerConfigurator:
         # we create
         uc = self.client.create("odata/unitcleaners/", data)
 
-        self.client.detail_route(
+        self.client.detail_action(
             "odata/unitcleaners/",
             uc["id"],
             "PATCH",

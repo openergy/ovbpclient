@@ -35,3 +35,4 @@ class SyncWrapper:
     @property
     def async(self):
         return self._async_object
+

@@ -17,7 +17,7 @@ class Gate(Resource):
 
         client = get_client()
 
-        client.detail_route(
+        client.detail_action(
             "odata/gate_ftp_accounts",
             self.ftp_account,
             "POST",
@@ -54,7 +54,7 @@ class Gate(Resource):
 
             client = get_client()
 
-            client.detail_route(
+            client.detail_action(
                 "odata/base_feeders",
                 self.base_feeder["id"],
                 "POST",
@@ -271,7 +271,7 @@ class Gate(Resource):
         else:
             client = get_client()
 
-            return client.detail_route(
+            return client.detail_action(
                 "odata/gate_ftp_accounts/",
                 self.ftp_account["id"],
                 "GET",
@@ -323,7 +323,7 @@ class Gate(Resource):
 
         client = get_client()
 
-        self._password = client.detail_route(
+        self._password = client.detail_action(
             "odata/gate_ftp_accounts",
             self.ftp_account['id'],
             "GET",

@@ -127,7 +127,7 @@ class Importer(Generator):
 
          client = get_client()
 
-         client.detail_route(
+         client.detail_action(
              "odata/importers",
              self.id,
              "POST",
@@ -169,7 +169,7 @@ class Importer(Generator):
         if partial_instant is not None:
             data["partial_instant"] = partial_instant
 
-        client.detail_route(
+        client.detail_action(
             "odata/importers",
             self.id,
             "POST",
