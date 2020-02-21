@@ -1,4 +1,5 @@
 from ..base import BaseModel
+from ...util import get_one_and_only_one
 
 
 class Project(BaseModel):
@@ -11,7 +12,7 @@ class Project(BaseModel):
     def _get_record_by_name(self, endpoint, name):
         # todo: check that my filter_by works
         records = endpoint.list(limit=2, filter_by=dict(name=name, project=self.get_odata_project().id))
-        return records.one()
+        return get_one_and_only_one(records)
 
     def _list_all(self, endpoint, other_filters=None):
         filter_by = dict(project=self.get_odata_project().id)

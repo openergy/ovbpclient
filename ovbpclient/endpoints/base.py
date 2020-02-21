@@ -1,5 +1,4 @@
 import ovbpclient
-from ..queryset import Queryset
 from ..models import BaseModel
 
 
@@ -21,7 +20,7 @@ class BaseEndpoint:
             limit=200,
             filter_by=None,
             order_by=None
-    ) -> Queryset:
+    ) -> list:
         params = dict(start=start, limit=limit)
         if filter_by is not None:
             params.update(filter_by)
@@ -32,7 +31,7 @@ class BaseEndpoint:
             self.path,
             params=params
         )["data"]
-        return Queryset([self.data_to_record(data) for data in data_l])
+        return [self.data_to_record(data) for data in data_l]
 
     def iter(self, filter_by=None, order_by=None):
         # todo: manage parameters
@@ -53,8 +52,8 @@ class BaseEndpoint:
         else:
             raise RuntimeError(f"maximum iteration was reached ({i}), stopping")
 
-    def list_all(self, filter_by=None, order_by=None) -> Queryset:
-        return Queryset(self.iter(filter_by=filter_by, order_by=order_by))
+    def list_all(self, filter_by=None, order_by=None) -> list:
+        return self.iter(filter_by=filter_by, order_by=order_by)
 
     def create(self, data) -> "BaseModel":
         data = self.client.rest_client.create(self.path, data)

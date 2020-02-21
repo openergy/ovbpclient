@@ -2,6 +2,7 @@ from .rest_client import RestClient
 
 from .endpoints import BaseEndpoint
 from .models import oteams as oteams_models, odata  as odata_models
+from .util import get_one_and_only_one
 
 
 class Client:
@@ -105,5 +106,5 @@ class Client:
     # --- organization
     def get_organization_by_name(self, name) -> "oteams_models.Organization":
         # todo: check name
-        orgs_qs = self.organizations.list(limit=2, filter_by=dict(name=name))
-        return orgs_qs.one()
+        orgs = self.organizations.list(limit=2, filter_by=dict(name=name))
+        return get_one_and_only_one(orgs)

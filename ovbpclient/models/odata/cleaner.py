@@ -8,6 +8,7 @@ from openpyxl.formatting.rule import FormulaRule
 import ovbpclient
 from ..base import BaseModel
 from ...exceptions import RecordDoesNotExistError
+from ...util import get_one_and_only_one
 
 module_path = os.path.realpath(ovbpclient.__file__)
 
@@ -275,7 +276,10 @@ class Cleaner(BaseModel):
             # see if unitcleaner exists
             unitcleaner = None
             try:
-                unitcleaner = unitcleaners.one(lambda x: x.external_name == excel_unitcleaner_data["external_name"])
+                unitcleaner = get_one_and_only_one(
+                    unitcleaners,
+                    lambda x: x.external_name == excel_unitcleaner_data["external_name"]
+                )
             except RecordDoesNotExistError:
                 pass
 
