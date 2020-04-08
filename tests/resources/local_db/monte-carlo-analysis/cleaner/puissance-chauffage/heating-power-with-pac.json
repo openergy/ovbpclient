@@ -1,7 +1,0 @@
-{
-    "default_resample_rule": "mean",
-    "name": "Heating Power with PAC",
-    "native_clock": "tzt",
-    "freq": "T",
-    "timezone": "Europe/Paris"
-}

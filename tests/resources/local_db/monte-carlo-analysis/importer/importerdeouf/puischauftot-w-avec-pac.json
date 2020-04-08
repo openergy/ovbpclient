@@ -1,7 +1,0 @@
-{
-    "default_resample_rule": "mean",
-    "name": "PuisChaufTot (W) avec PAC",
-    "native_clock": "tzt",
-    "freq": null,
-    "timezone": null
-}

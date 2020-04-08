@@ -21,57 +21,53 @@ class RestClient:
 
     def __init__(
             self,
-            host,
+            url,
             login,
             password,
             verify_ssl=True
     ):
-        """
-        credentials: login, password
-        """
-        # todo: manage non https connexions
-        self.base_url = host.strip("/")
+        self.base_url = url.strip("/")
         self.session = requests.Session()
         self.session.auth = (login, password)
         self.verify_ssl = verify_ssl
 
-    def list(self, endpoint, params=None):
+    def list(self, path, params=None):
         rep = self.session.get(
-            f"{self.base_url}/{endpoint}/",
+            f"{self.base_url}/{path}/",
             params=params,
             verify=self.verify_ssl)
         return rep_to_json(rep)
 
-    def retrieve(self, endpoint, resource_id):
+    def retrieve(self, path, resource_id):
         rep = self.session.get(
-            f"{self.base_url}/{endpoint}/{resource_id}/",
+            f"{self.base_url}/{path}/{resource_id}/",
             verify=self.verify_ssl)
         return rep_to_json(rep)
 
-    def create(self, plural_rel, data):
+    def create(self, path, data):
         rep = self.session.post(
-            f"{self.base_url}/{plural_rel}",
+            f"{self.base_url}/{path}",
             json=data,
             verify=self.verify_ssl)
         return rep_to_json(rep)
 
-    def partial_update(self, endpoint, resource_id, data):
+    def partial_update(self, path, resource_id, data):
         rep = self.session.patch(
-            f"{self.base_url}/{endpoint}/{resource_id}",
+            f"{self.base_url}/{path}/{resource_id}",
             json=data,
             verify=self.verify_ssl)
         return rep_to_json(rep)
 
-    def update(self, endpoint, resource_id, data):
+    def update(self, path, resource_id, data):
         rep = self.session.put(
-            f"{self.base_url}/{endpoint}/{resource_id}",
+            f"{self.base_url}/{path}/{resource_id}",
             json=data,
             verify=self.verify_ssl)
         return rep_to_json(rep)
 
     def detail_action(
             self, 
-            endpoint,
+            path,
             resource_id,
             http_method, 
             action_name, 
@@ -80,7 +76,7 @@ class RestClient:
             return_json=True,
             send_json=True):
         rep = getattr(self.session, http_method.lower())(
-            f"{self.base_url}/{endpoint}/{resource_id}/{action_name}",
+            f"{self.base_url}/{path}/{resource_id}/{action_name}",
             params=params,
             json=data if send_json else None,
             data=None if send_json else data,
@@ -96,7 +92,7 @@ class RestClient:
 
     def list_action(
             self, 
-            plural_rel, 
+            path,
             http_method, 
             action_name, 
             params=None, 
@@ -104,7 +100,7 @@ class RestClient:
             return_json=True, 
             send_json=True):
         rep = getattr(self.session, http_method.lower())(
-            f"{self.base_url}/{plural_rel}/{action_name}",
+            f"{self.base_url}/{path}/{action_name}",
             params=params,
             json=data if send_json else None,
             data=None if send_json else data,
@@ -118,9 +114,9 @@ class RestClient:
         check_rep(rep)
         return rep.content
 
-    def destroy(self, endpoint, resource_id, params=None):
+    def destroy(self, path, resource_id, params=None):
         rep = self.session.delete(
-            f"{self.base_url}/{endpoint}/{resource_id}",
+            f"{self.base_url}/{path}/{resource_id}",
             params=params,
             verify=self.verify_ssl)
         if rep.status_code == 204:
@@ -137,7 +133,7 @@ class RestClient:
             try:
                 rep = self.session.get(
                     f"{self.base_url}/oteams/projects/",
-                    params=dict(empty=True),  # todo: check works
+                    params=dict(empty=True),
                     verify=self.verify_ssl)
                 if rep.status_code == 503:
                     raise TimeoutError

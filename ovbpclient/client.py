@@ -1,5 +1,6 @@
+import getpass
+import re
 from .rest_client import RestClient
-
 from .endpoints import BaseEndpoint
 from .models import oteams as oteams_models, odata  as odata_models
 from .util import get_one_and_only_one
@@ -8,15 +9,31 @@ from .util import get_one_and_only_one
 class Client:
     def __init__(
             self,
-            host,
-            login,
-            password,
-            port=443,
+            url="https://data.openergy.fr/api/v2",
+            auth_buffer_or_path=None,
             verify_ssl=True
     ):
-        # todo: manage credentials properly
+        # retrieve login/password
+        if auth_buffer_or_path is None:
+            login = input("Login: ")
+            password = getpass.getpass()
+        else:
+            # prepare credentials str
+            if isinstance(auth_buffer_or_path, str):
+                with open(auth_buffer_or_path) as f:
+                    auth_str = f.read()
+            else:
+                auth_str = auth_buffer_or_path.read()
+
+            # parse
+            auth_l = auth_str.strip().split("\n")
+            if len(auth_l) < 2:
+                raise ValueError("could not parse auth should be:\nlogin\npassword")
+            login, password = auth_l[:2]
+
+        # initialize rest client
         self.rest_client = RestClient(
-            host,
+            url,
             login,
             password,
             verify_ssl=verify_ssl
@@ -104,7 +121,11 @@ class Client:
         )
 
     # --- organization
-    def get_organization_by_name(self, name) -> "oteams_models.Organization":
-        # todo: check name
+    def get_organization(self, name) -> "oteams_models.Organization":
         orgs = self.organizations.list(limit=2, filter_by=dict(name=name))
         return get_one_and_only_one(orgs)
+
+    # -- project
+    def get_project(self, organization_name, project_name) -> "oteams_models.Project":
+        org = self.get_organization(organization_name)
+        return org.get_project(project_name)

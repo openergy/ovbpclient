@@ -32,7 +32,7 @@ class BaseModel:
             self.id,
             data
         )
-        self.data = updated_data  # todo: check that partial update returns complete data
+        self.data.update({k: updated_data[k] for k in data})
 
     def delete(self):
         self.endpoint.client.rest_client.destroy(

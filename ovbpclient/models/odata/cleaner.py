@@ -1,4 +1,5 @@
 import os
+import logging
 
 from openpyxl import load_workbook
 from openpyxl.worksheet.datavalidation import DataValidation
@@ -11,6 +12,8 @@ from ...exceptions import RecordDoesNotExistError
 from ...util import get_one_and_only_one
 
 module_path = os.path.realpath(ovbpclient.__file__)
+
+logger = logging.getLogger(__name__)
 
 
 class Cleaner(BaseModel):
@@ -292,7 +295,7 @@ class Cleaner(BaseModel):
                         diff[k] = v
                 # if diff, update
                 if len(diff) > 0:
-                    # todo: manage logging
+                    logging.info(f"unitcleaner {unitcleaner.name} already exists, updating")
                     unitcleaner.update(diff)
 
             # 2. does not exist
