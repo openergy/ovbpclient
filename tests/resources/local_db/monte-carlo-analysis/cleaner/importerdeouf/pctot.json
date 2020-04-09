@@ -1,7 +1,0 @@
-{
-    "default_resample_rule": "mean",
-    "name": "pctot",
-    "native_clock": "dst",
-    "freq": "10T",
-    "timezone": "Europe/Paris"
-}
