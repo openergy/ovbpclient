@@ -1,8 +1,7 @@
 import getpass
-import re
 from .rest_client import RestClient
 from .endpoints import BaseEndpoint, SeriesEndpoint
-from .models import oteams as oteams_models, odata  as odata_models
+from .models import oteams as oteams_models, odata as odata_models
 from .util import get_one_and_only_one
 
 
@@ -117,7 +116,8 @@ class Client:
         # odata - series
         self.series = SeriesEndpoint(
             self,
-            "odata/series"
+            "odata/series",
+            model_cls=odata_models.Series
         )
 
         # odata - notifications

@@ -14,7 +14,7 @@ class BaseModel:
         return self.data[item]
 
     def __repr__(self):
-        msg = f"<{self.__class__.__name__}: "
+        msg = f"<{self.endpoint.path}: "
         try:
             name = self.name
             msg += f"{name} ({self.id})>"
@@ -38,24 +38,4 @@ class BaseModel:
         self.endpoint.client.rest_client.destroy(
             self.endpoint.path,
             self.id
-        )
-
-
-class ActiveBaseModel(BaseModel):
-    def activate(self):
-        self.endpoint.client.rest_client.detail_action(
-            self.endpoint,
-            self.id,
-            "patch",
-            "active",
-            data=dict(value=True)
-        )
-
-    def deactivate(self):
-        self.endpoint.client.rest_client.detail_action(
-            self.endpoint,
-            self.id,
-            "patch",
-            "active",
-            data=dict(value=False)
         )

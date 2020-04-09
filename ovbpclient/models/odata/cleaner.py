@@ -8,44 +8,51 @@ from openpyxl.formatting.rule import FormulaRule
 
 import ovbpclient
 from ..base import BaseModel
+from .mixin_generator import GeneratorModelMixin
 from ...exceptions import RecordDoesNotExistError
 from ...util import get_one_and_only_one
 
-module_path = os.path.realpath(ovbpclient.__file__)
+module_path = os.path.realpath(os.path.join(ovbpclient.__file__, ".."))
 
 logger = logging.getLogger(__name__)
 
 
-class Cleaner(BaseModel):
-    def get_project(self):
-        return self.client.projects.retrieve(self.project)
+class Cleaner(BaseModel, GeneratorModelMixin):
+    def get_odata_project(self):
+        return self.client.odata_projects.retrieve(self.project)
+
+    def get_unitcleaner(self, external_name):
+        unitcleaners_l = self.client.unitcleaners.list(
+            filter_by=dict(cleaner=self.id, external_name=external_name),
+            limit=2)
+        return get_one_and_only_one(unitcleaners_l)
 
     def create_unitcleaner(
             self,
             external_name,
-            name=None,
+            name,
             freq="1H",
             input_unit_type="instantaneous",
             unit_type="instantaneous",
             input_convention="left",
             clock="tzt",
             timezone="Europe/Paris",
-            unit=None,
+            unit="",
             resample_rule="mean",
-            interpolate_limit=None,
+            interpolate_limit=0,
             wait_offset="6H",
-            label=None,
-            input_expected_regular=None,
+            label="",
+            input_expected_regular=False,
             operation_fct=None,
             filter_fct=None,
             derivative_filter_fct=None,
             custom_delay=None,
             custom_fct=None,
             custom_before_offset=None,
-            custom_after_offset=None,
-            activate=True
+            custom_after_offset=None
     ):
         data = dict(
+            cleaner=self.id,
             external_name=external_name,
             name=name,
             freq=freq,
@@ -66,10 +73,9 @@ class Cleaner(BaseModel):
             custom_delay=custom_delay,
             custom_fct=custom_fct,
             custom_before_offset=custom_before_offset,
-            custom_after_offset=custom_after_offset,
-            activate=activate
+            custom_after_offset=custom_after_offset
         )
-        return self.client.unitcleaners.create(data)
+        return self.client.unitcleaners.create(**data)
 
     def list_all_importer_series(self):
         return self.client.importer_series.list_all(filter_by=dict(generator=self.related_importer))
@@ -77,8 +83,44 @@ class Cleaner(BaseModel):
     def list_all_unitcleaners(self):
         return self.client.unitcleaners.list_all(filter_by=dict(cleaner=self.id))
 
-    def configuration_to_excel(self, path):
-        project_data = self.get_project()
+    def configure_from_excel(self, path):
+        # retrieve current unitcleaners data
+        unitcleaners = self.list_all_unitcleaners()
+
+        # load excel data
+        all_excel_unitcleaners_data = excel_to_unitcleaners_data(path)
+
+        # iter excel data
+        for excel_unitcleaner_data in all_excel_unitcleaners_data:
+            # see if unitcleaner exists
+            unitcleaner = None
+            try:
+                unitcleaner = get_one_and_only_one(
+                    unitcleaners,
+                    lambda x: x.external_name == excel_unitcleaner_data["external_name"]
+                )
+            except RecordDoesNotExistError:
+                pass
+
+            # manage both workflows
+            # 1. already exists
+            if unitcleaner is not None:
+                diff = dict()
+                for k, v in excel_unitcleaner_data.items():
+                    if getattr(unitcleaner, v) != v:
+                        diff[k] = v
+                # if diff, update
+                if len(diff) > 0:
+                    logging.info(f"unitcleaner {unitcleaner.name} already exists, updating")
+                    unitcleaner.update(diff)
+
+            # 2. does not exist
+            else:
+                # create
+                self.create_unitcleaner(**excel_unitcleaner_data)
+
+    def export_configuration_to_excel(self, path):
+        odata_project = self.get_odata_project()
         cleaner_data = self.data
         unitcleaners = self.list_all_unitcleaners()
         not_configured_series = [se for se in self.list_all_importer_series() if se.unitcleaner is None]
@@ -98,7 +140,7 @@ class Cleaner(BaseModel):
         wb = load_workbook(os.path.join(module_path, "resources", 'multiclean_config_model.xlsx'))
         ws = wb["Series"]
 
-        ws['B2'].value = project_data['name']
+        ws['B2'].value = odata_project.name
         ws['B3'].value = cleaner_data['name']
 
         # ****************
@@ -182,7 +224,7 @@ class Cleaner(BaseModel):
             ws['A{}'.format(row)].value = unitcleaners[i].external_name
             ws['B{}'.format(row)].value = unitcleaners[i].name
             # Column C = Save Config, always empty when the Excel is generated
-            ws['D{}'.format(row)].value = 'yes' if unitcleaners[i].active else 'no'
+            ws['D{}'.format(row)].value = 'yes'
             ws['E{}'.format(row)].value = unitcleaners[i].freq
             ws['F{}'.format(row)].value = unitcleaners[i].input_unit_type
             ws['G{}'.format(row)].value = unitcleaners[i].input_convention
@@ -255,53 +297,17 @@ class Cleaner(BaseModel):
                 elif col == last_col and row == last_row:
                     cell.border = right_bottom_thin_border
                 # Formatting
-                ws.conditional_formatting.add(
-                    '{0}{1}'.format(cell.column, cell.row),
-                    FormulaRule(
-                        formula=['C{}="x"'.format(row)],
-                        fill=green_fill)
-                )
+                # ws.conditional_formatting.add(
+                #     '{0}{1}'.format(cell.column, cell.row),
+                #     FormulaRule(
+                #         formula=['C{}="x"'.format(row)],
+                #         fill=green_fill)
+                # )
 
         # **********
         # write book
         # **********
         wb.save(path)
-
-    def configure_from_excel(self, path):
-        # retrieve current unitcleaners data
-        unitcleaners = self.list_all_unitcleaners()
-
-        # load excel data
-        all_excel_unitcleaners_data = excel_to_unitcleaners_data(path)
-
-        # iter excel data
-        for excel_unitcleaner_data in all_excel_unitcleaners_data:
-            # see if unitcleaner exists
-            unitcleaner = None
-            try:
-                unitcleaner = get_one_and_only_one(
-                    unitcleaners,
-                    lambda x: x.external_name == excel_unitcleaner_data["external_name"]
-                )
-            except RecordDoesNotExistError:
-                pass
-
-            # manage both workflows
-            # 1. already exists
-            if unitcleaner is not None:
-                diff = dict()
-                for k, v in excel_unitcleaner_data.items():
-                    if getattr(unitcleaner, v) != v:
-                        diff[k] = v
-                # if diff, update
-                if len(diff) > 0:
-                    logging.info(f"unitcleaner {unitcleaner.name} already exists, updating")
-                    unitcleaner.update(diff)
-
-            # 2. does not exist
-            else:
-                # create
-                self.create_unitcleaner(**excel_unitcleaner_data)
 
 
 def excel_to_unitcleaners_data(path, max_input_length=20000):

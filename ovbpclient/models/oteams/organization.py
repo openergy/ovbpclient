@@ -8,3 +8,10 @@ class Organization(BaseModel):
             limit=2,
             filter_by=dict(name=name, organization=self.id))
         return get_one_and_only_one(projects_l)
+
+    def create_project(self, name, comment=""):
+        return self.client.projects.create(
+            organization=self.id,
+            name=name,
+            comment=comment
+        )

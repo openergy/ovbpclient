@@ -62,7 +62,7 @@ class BaseEndpoint:
     def list_all(self, filter_by=None) -> list:
         return list(self.iter(filter_by=filter_by))
 
-    def create(self, data) -> "BaseModel":
+    def create(self, **data) -> "BaseModel":
         data = self.client.rest_client.create(self.path, data)
         return self.data_to_record(data)
 

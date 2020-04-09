@@ -1,7 +1,8 @@
-from ..base import ActiveBaseModel
+from ..base import BaseModel
+from ..mixin_active import ActiveModelMixin
 
 
-class BaseFeeder(ActiveBaseModel):
+class BaseFeeder(BaseModel, ActiveModelMixin):
     def feed(self):
         self.client.detail_action(
             self.endpoint,

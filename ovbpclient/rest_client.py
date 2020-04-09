@@ -46,21 +46,21 @@ class RestClient:
 
     def create(self, path, data):
         rep = self.session.post(
-            f"{self.base_url}/{path}",
+            f"{self.base_url}/{path}/",
             json=data,
             verify=self.verify_ssl)
         return rep_to_json(rep)
 
     def partial_update(self, path, resource_id, data):
         rep = self.session.patch(
-            f"{self.base_url}/{path}/{resource_id}",
+            f"{self.base_url}/{path}/{resource_id}/",
             json=data,
             verify=self.verify_ssl)
         return rep_to_json(rep)
 
     def update(self, path, resource_id, data):
         rep = self.session.put(
-            f"{self.base_url}/{path}/{resource_id}",
+            f"{self.base_url}/{path}/{resource_id}/",
             json=data,
             verify=self.verify_ssl)
         return rep_to_json(rep)
@@ -76,7 +76,7 @@ class RestClient:
             return_json=True,
             send_json=True):
         rep = getattr(self.session, http_method.lower())(
-            f"{self.base_url}/{path}/{resource_id}/{action_name}",
+            f"{self.base_url}/{path}/{resource_id}/{action_name}/",
             params=params,
             json=data if send_json else None,
             data=None if send_json else data,
@@ -100,7 +100,7 @@ class RestClient:
             return_json=True, 
             send_json=True):
         rep = getattr(self.session, http_method.lower())(
-            f"{self.base_url}/{path}/{action_name}",
+            f"{self.base_url}/{path}/{action_name}/",
             params=params,
             json=data if send_json else None,
             data=None if send_json else data,
@@ -116,7 +116,7 @@ class RestClient:
 
     def destroy(self, path, resource_id, params=None):
         rep = self.session.delete(
-            f"{self.base_url}/{path}/{resource_id}",
+            f"{self.base_url}/{path}/{resource_id}/",
             params=params,
             verify=self.verify_ssl)
         if rep.status_code == 204:
