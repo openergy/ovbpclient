@@ -1,5 +1,4 @@
 include README.md
-include requirements-conda.txt
-include openergy/configurators/resources/multiclean_config_model.xlsx
-include openergy/tests/resources/**
+include requirements.txt
+recursive-include ovbpclient/resources *
 exclude tests

@@ -2,7 +2,8 @@
 
 (p): patch, (m): minor, (M): major
 
-## next
+## 1.0.2
+* p: prepared for pypi
 * p: pandas requirement was loosened
 
 ## 1.0.1
