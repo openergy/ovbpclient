@@ -25,7 +25,7 @@ from ovbpclient import Client, RecordDoesNotExistError
 #@ ### prepare client
 
 # auth file is a text file with two lines: the first one contains login, the second password
-client = Client(auth_buffer_or_path=AUTH_PATH)
+client = Client(AUTH_PATH)
 
 ## ---------------------------------------------------------------------------------------------------------------------
 ## ----------------------------------------------- project -------------------------------------------------------------

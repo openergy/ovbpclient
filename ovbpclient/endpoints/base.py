@@ -66,6 +66,24 @@ class BaseEndpoint:
         data = self.client.rest_client.create(self.path, data)
         return self.data_to_record(data)
 
-    def retrieve(self, resource_id) -> "BaseModel":
-        data = self.client.rest_client.retrieve(self.path, resource_id)
+    def retrieve(self, record_id) -> "BaseModel":
+        data = self.client.rest_client.retrieve(self.path, record_id)
         return self.data_to_record(data)
+
+    def list_action(
+            self,
+            http_method,
+            action_name,
+            params=None,
+            data=None,
+            return_json=True,
+            send_json=True):
+        return self.client.rest_client.list_action(
+            self.path,
+            http_method,
+            action_name,
+            params=params,
+            data=data,
+            return_json=return_json,
+            send_json=send_json
+        )

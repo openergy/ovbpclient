@@ -9,7 +9,7 @@ class Organization(BaseModel):
             filter_by=dict(name=name, organization=self.id))
         return get_one_and_only_one(projects_l)
 
-    def create_project(self, name, comment=""):
+    def create_project(self, name, comment="") -> "oteams_models.Project":
         return self.client.projects.create(
             organization=self.id,
             name=name,

@@ -19,7 +19,7 @@
 
 
 	# auth file is a text file with two lines: the first one contains login, the second password
-	client = Client(auth_buffer_or_path=AUTH_PATH)
+	client = Client(AUTH_PATH)
 
 
  ## Project
@@ -144,9 +144,9 @@
 
 *out:*
 
-	<odata/importers: importer-a (22d97b86-4483-4f06-96b5-22958ca71ff9)>
+	<odata/importers: importer-a (f7e0621b-f2d2-4bd7-9e8b-3e807ca3547c)>
 
-	OrderedDict([('id', '22d97b86-4483-4f06-96b5-22958ca71ff9'),
+	OrderedDict([('id', 'f7e0621b-f2d2-4bd7-9e8b-3e807ca3547c'),
 	             ('rights', None),
 	             ('active', False),
 	             ('name', 'importer-a'),
@@ -165,10 +165,10 @@
 	             ('re_run_last_file', False),
 	             ('notify_missing_files_nb', 0),
 	             ('max_ante_scanned_files_nb', 0),
-	             ('last_run', datetime.datetime(2020, 4, 9, 15, 21, 34, 599191)),
-	             ('last_clear', datetime.datetime(2020, 4, 9, 15, 20, 9, 23151)),
-	             ('last_imported_path', 'first.json'),
-	             ('latest_imported_mdate', '2020-04-09T15:20:07Z'),
+	             ('last_run', None),
+	             ('last_clear', None),
+	             ('last_imported_path', None),
+	             ('latest_imported_mdate', None),
 	             ('project', '0d9b1d54-8fe7-4925-9b16-3d3636c467af'),
 	             ('gate', '0af8ead9-612a-46f8-a250-8545937101aa')])
 
@@ -204,9 +204,9 @@
 
 *out:*
 
-	<odata/series: a (a9395977-28c2-427a-9b1b-f286d0a61133)>
-	<odata/series: c (b83eadc2-b105-45dd-b6bc-831cb4b26c5f)>
-	<odata/series: b (1f89ad01-c728-41f0-a9fa-1424e32f2e4a)>
+	<odata/series: c (b7361016-41f0-4661-9c06-636db27d6c1b)>
+	<odata/series: b (8789638c-6bcc-427e-94b4-99a64ab0922e)>
+	<odata/series: a (8d7b6c45-742b-4706-897c-c6356660d2a3)>
 
  get output dataframe
 
@@ -220,14 +220,14 @@
 
 *out:*
 
-	                       b    a    c
-	2012-01-01 06:00:00  2.0  1.0  3.0
-	2012-01-01 07:00:00  2.0  1.0  3.0
-	2012-01-01 08:00:00  2.0  1.0  3.0
-	2012-01-01 09:00:00  2.0  1.0  3.0
-	2012-01-01 10:00:00  2.0  1.0  3.0
-	2012-01-01 11:00:00  2.0  1.0  3.0
-	2012-01-01 12:00:00  2.0  1.0  3.0
+	                       a    b    c
+	2012-01-01 06:00:00  1.0  2.0  3.0
+	2012-01-01 07:00:00  1.0  2.0  3.0
+	2012-01-01 08:00:00  1.0  2.0  3.0
+	2012-01-01 09:00:00  1.0  2.0  3.0
+	2012-01-01 10:00:00  1.0  2.0  3.0
+	2012-01-01 11:00:00  1.0  2.0  3.0
+	2012-01-01 12:00:00  1.0  2.0  3.0
 
  get output series
 
@@ -238,11 +238,11 @@
 
 *out:*
 
-	2012-01-01 00:00:00    1.0
-	2012-01-01 01:00:00    1.0
-	2012-01-01 02:00:00    1.0
-	2012-01-01 03:00:00    1.0
-	2012-01-01 04:00:00    1.0
+	2012-01-01 00:00:00    3.0
+	2012-01-01 01:00:00    3.0
+	2012-01-01 02:00:00    3.0
+	2012-01-01 03:00:00    3.0
+	2012-01-01 04:00:00    3.0
 	dtype: float64
 
  ## Cleaner
@@ -260,17 +260,17 @@
 
 *out:*
 
-	<odata/cleaners: importer-a (69f1518a-394c-41d8-9de4-21fab3887a42)>
+	<odata/cleaners: importer-a (c49b62ff-3f9d-4db4-9d93-b47c8eb77c00)>
 
-	OrderedDict([('id', '69f1518a-394c-41d8-9de4-21fab3887a42'),
+	OrderedDict([('id', 'c49b62ff-3f9d-4db4-9d93-b47c8eb77c00'),
 	             ('rights', None),
 	             ('name', 'importer-a'),
 	             ('comment', ''),
 	             ('model', 'cleaner'),
-	             ('last_run', datetime.datetime(2020, 4, 9, 15, 25, 34, 830453)),
-	             ('last_clear', datetime.datetime(2020, 4, 9, 15, 20, 9, 878437)),
+	             ('last_run', datetime.datetime(2020, 4, 10, 7, 57, 18, 301630)),
+	             ('last_clear', datetime.datetime(2020, 4, 10, 7, 57, 15, 399946)),
 	             ('project', '0d9b1d54-8fe7-4925-9b16-3d3636c467af'),
-	             ('related_importer', '22d97b86-4483-4f06-96b5-22958ca71ff9')])
+	             ('related_importer', 'f7e0621b-f2d2-4bd7-9e8b-3e807ca3547c')])
 
  delete unitcleaners if any
 
@@ -293,9 +293,9 @@
 
 *out:*
 
-	<odata/unitcleaners: b-cleaned (0eb1dfac-ea3d-4272-8d33-1a435506d251)>
-	<odata/unitcleaners: c-cleaned (aff97481-3e1f-4490-8e6e-332d624de809)>
-	<odata/unitcleaners: a-cleaned (41fd1215-e9ed-4df5-a7df-361f48aa1df0)>
+	<odata/unitcleaners: a-cleaned (0ce56f03-1b06-425e-b306-39206c45f765)>
+	<odata/unitcleaners: b-cleaned (c8e4428e-7ea2-4597-8efc-41b56f39b7c3)>
+	<odata/unitcleaners: c-cleaned (d9151e2d-318c-48a2-a3ab-3d5bb15629ce)>
 
  ### Configure using excel
  export configuration to excel
@@ -332,14 +332,14 @@
 
 *out:*
 
-	<odata/series: b-cleaned (69424ba6-abc8-4216-95b7-64aa360f4d1a)>
-	<odata/series: c-cleaned (4539bdf2-d82c-43fe-a891-e28bd5d9d51c)>
-	<odata/series: a-cleaned (9e25832b-722a-4298-a67e-1e081abcd1df)>
-	                     a-cleaned  c-cleaned  b-cleaned
-	2012-01-01 01:00:00        1.0        3.0        2.0
-	2012-01-01 02:00:00        1.0        3.0        2.0
-	2012-01-01 03:00:00        1.0        3.0        2.0
-	2012-01-01 04:00:00        1.0        3.0        2.0
+	<odata/series: a-cleaned (5c404d73-b614-4337-ada7-4fd525c3b81c)>
+	<odata/series: b-cleaned (a94ee7ce-d489-442b-a490-f1ebbe6fd298)>
+	<odata/series: c-cleaned (900491d3-cc67-4c8f-b38c-73bb504a4d27)>
+	                     c-cleaned  b-cleaned  a-cleaned
+	2012-01-01 01:00:00        3.0        2.0        1.0
+	2012-01-01 02:00:00        3.0        2.0        1.0
+	2012-01-01 03:00:00        3.0        2.0        1.0
+	2012-01-01 04:00:00        3.0        2.0        1.0
 
  ## Analysis
 
@@ -364,9 +364,9 @@
 
 *out:*
 
-	<odata/analyses: analysis-a (f82b7ec8-c575-4572-abc1-d0b43792bd18)>
+	<odata/analyses: analysis-a (aa2940e9-cc7e-47ea-87c8-6a7bffb866f3)>
 
-	OrderedDict([('id', 'f82b7ec8-c575-4572-abc1-d0b43792bd18'),
+	OrderedDict([('id', 'aa2940e9-cc7e-47ea-87c8-6a7bffb866f3'),
 	             ('rights', None),
 	             ('analysisconfig', None),
 	             ('active', False),
@@ -392,8 +392,8 @@
 
 *out:*
 
-	<odata/analysis_inputs: ae0bd593-9503-45f2-b20e-3942dbde179d>
-	<odata/analysis_inputs: 6de9a15d-98db-4b53-98c6-4853b182eb2f>
+	<odata/analysis_inputs: caf321b7-3013-4699-861b-883da6a6b5cb>
+	<odata/analysis_inputs: ba8230dd-843c-4320-8c3e-aa0ce1d1b941>
 
  configure outputs if not already done
 
@@ -411,7 +411,7 @@
 
 *out:*
 
-	<odata/analysis_outputs: a-output (9a71c063-f3c6-428f-80d4-b11d1ed2baa0)>
+	<odata/analysis_outputs: a-output (7deda1bb-584c-4bde-809c-2183e286aa94)>
 
  prepare analysis script
 
@@ -442,14 +442,14 @@
 
 *out:*
 
-	OrderedDict([('id', 'f82b7ec8-c575-4572-abc1-d0b43792bd18'),
+	OrderedDict([('id', 'aa2940e9-cc7e-47ea-87c8-6a7bffb866f3'),
 	             ('rights',
 	              OrderedDict([('can_delete', True),
 	                           ('can_read', True),
 	                           ('can_admin', True),
 	                           ('can_write', True)])),
 	             ('analysisconfig',
-	              OrderedDict([('id', '04817a2b-e82c-454b-b26e-8793486520a3'),
+	              OrderedDict([('id', 'b05eaa68-795c-453f-a02b-8bc6b1228ba1'),
 	                           ('rights', None),
 	                           ('output_tags', []),
 	                           ('clock', 'tzt'),
@@ -474,7 +474,7 @@
 	                           ('wait_offset', '6H'),
 	                           ('custom_delay', None),
 	                           ('analysis',
-	                            'f82b7ec8-c575-4572-abc1-d0b43792bd18')])),
+	                            'aa2940e9-cc7e-47ea-87c8-6a7bffb866f3')])),
 	             ('active', False),
 	             ('is_obsolete', False),
 	             ('unresolved_notifications_nb', 0),

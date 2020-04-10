@@ -8,8 +8,8 @@ from .util import get_one_and_only_one
 class Client:
     def __init__(
             self,
-            url="https://data.openergy.fr/api/v2",
             auth_buffer_or_path=None,
+            url="https://data.openergy.fr/api/v2",
             verify_ssl=True
     ):
         # retrieve login/password

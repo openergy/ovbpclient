@@ -34,9 +34,7 @@ class Importer(BaseModel, ActiveModelMixin, GeneratorModelMixin):
         self.update(**data)
 
     def run(self):
-        self.client.rest_client.detail_action(
-            self.endpoint.path,
-            self.id,
+        self.detail_action(
             "post",
             "action",
             data=dict(name="run")
@@ -44,19 +42,13 @@ class Importer(BaseModel, ActiveModelMixin, GeneratorModelMixin):
 
     def reset(self, partial_instant=None, last_imported_path=None):
         if last_imported_path is not None:
-            self.client.rest_client.partial_update(
-                self.endpoint.path,
-                self.id,
-                data=dict(last_imported_path="last_imported_path")
-            )
+            self.update(last_imported_path="last_imported_path")
         data = dict(name="reset")
 
         if partial_instant is not None:
             data["partial_instant"] = partial_instant
 
-        self.client.rest_client.detail_action(
-            self.endpoint.path,
-            self.id,
+        self.detail_action(
             "post",
             "action",
             data=data

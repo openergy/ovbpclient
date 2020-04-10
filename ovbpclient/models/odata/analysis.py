@@ -5,9 +5,7 @@ from .mixin_generator import GeneratorModelMixin
 
 class Analysis(BaseModel, ActiveModelMixin, GeneratorModelMixin):
     def run(self):
-        self.client.rest_client.detail_action(
-            self.endpoint.path,
-            self.id,
+        self.detail_action(
             "post",
             "action",
             data=dict(name="run")
@@ -20,9 +18,7 @@ class Analysis(BaseModel, ActiveModelMixin, GeneratorModelMixin):
         if partial_instant is not None:
             data["partial_instant"] = partial_instant
 
-        return self.client.rest_client.detail_action(
-            self.endpoint.path,
-            self.id,
+        return self.detail_action(
             "post",
             "action",
             data=data

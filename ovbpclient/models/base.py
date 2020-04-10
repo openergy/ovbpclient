@@ -1,5 +1,3 @@
-
-
 class BaseModel:
     def __init__(self, endpoint, data):
         # touchy imports
@@ -38,4 +36,23 @@ class BaseModel:
         self.endpoint.client.rest_client.destroy(
             self.endpoint.path,
             self.id
+        )
+
+    def detail_action(
+            self,
+            http_method,
+            action_name,
+            params=None,
+            data=None,
+            return_json=True,
+            send_json=True):
+        return self.client.rest_client.detail_action(
+            self.endpoint.path,
+            self.id,
+            http_method,
+            action_name=action_name,
+            params=params,
+            data=data,
+            return_json=return_json,
+            send_json=send_json
         )
