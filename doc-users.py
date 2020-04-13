@@ -280,6 +280,31 @@ analysis_series = analysis.list_all_output_series()
 analysis_df = client.series.select_data(analysis_series)
 print(analysis_df)
 
+## ---------------------------------------------------------------------------------------------------------------------
+## ------------------------------------------ project overview ---------------------------------------------------------
+## ---------------------------------------------------------------------------------------------------------------------
+#@ ## Project overview
+
+#@ list and display records by type
+print("Gates:")
+for gate in project.list_all_gates():
+    print(f"\t{gate}")
+
+print("\nImporters:")
+for importer in project.list_all_importers():
+    print(f"\t{importer}")
+
+print("\nCleaners:")
+for cleaner in project.list_all_cleaners():
+    print(f"\t{cleaner}")
+
+print("\nAnalyses:")
+for analysis in project.list_all_analyses():
+    print(f"\t{analysis}")
+
+print(f"\nNon-resolved notifications:")
+for notification in project.list_all_notifications(resolved=False):
+    print(f"\t{notification}")
 
 ## ---------------------------------------------------------------------------------------------------------------------
 ## ----------------------------------------------- cleanup -------------------------------------------------------------

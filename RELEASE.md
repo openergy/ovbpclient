@@ -3,6 +3,7 @@
 (p): patch, (m): minor, (M): major
 
 ## next
+* p: enhanced documentation
 
 ## 1.0.2
 * p: prepared for pypi

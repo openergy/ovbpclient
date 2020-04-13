@@ -59,8 +59,8 @@
 	             ('name', 'Ovbpclient documentation'),
 	             ('comment', ''),
 	             ('private_comment', ''),
-	             ('creation_date', '2020-04-09'),
-	             ('display_buildings', True)])
+	             ('creation_date', '2020-04-13'),
+	             ('display_buildings', False)])
 
 
  Other syntax to directly access project:
@@ -165,10 +165,10 @@
 	             ('re_run_last_file', False),
 	             ('notify_missing_files_nb', 0),
 	             ('max_ante_scanned_files_nb', 0),
-	             ('last_run', None),
-	             ('last_clear', None),
-	             ('last_imported_path', None),
-	             ('latest_imported_mdate', None),
+	             ('last_run', datetime.datetime(2020, 4, 13, 11, 46, 42, 41112)),
+	             ('last_clear', datetime.datetime(2020, 4, 10, 16, 54, 40, 854481)),
+	             ('last_imported_path', 'first.json'),
+	             ('latest_imported_mdate', '2020-04-10T13:18:51Z'),
 	             ('project', '0d9b1d54-8fe7-4925-9b16-3d3636c467af'),
 	             ('gate', '0af8ead9-612a-46f8-a250-8545937101aa')])
 
@@ -204,9 +204,9 @@
 
 *out:*
 
-	<odata/series: c (b7361016-41f0-4661-9c06-636db27d6c1b)>
-	<odata/series: b (8789638c-6bcc-427e-94b4-99a64ab0922e)>
-	<odata/series: a (8d7b6c45-742b-4706-897c-c6356660d2a3)>
+	<odata/series: c (90a794f4-1439-4338-9a29-1c9d8e75d1d0)>
+	<odata/series: a (7a6c8e06-abe0-4f23-b81e-45af2a27c028)>
+	<odata/series: b (bb31ab30-a9f4-46ef-80d4-03c365962bd1)>
 
  get output dataframe
 
@@ -220,14 +220,14 @@
 
 *out:*
 
-	                       a    b    c
-	2012-01-01 06:00:00  1.0  2.0  3.0
-	2012-01-01 07:00:00  1.0  2.0  3.0
-	2012-01-01 08:00:00  1.0  2.0  3.0
-	2012-01-01 09:00:00  1.0  2.0  3.0
-	2012-01-01 10:00:00  1.0  2.0  3.0
-	2012-01-01 11:00:00  1.0  2.0  3.0
-	2012-01-01 12:00:00  1.0  2.0  3.0
+	                       b    a    c
+	2012-01-01 06:00:00  2.0  1.0  3.0
+	2012-01-01 07:00:00  2.0  1.0  3.0
+	2012-01-01 08:00:00  2.0  1.0  3.0
+	2012-01-01 09:00:00  2.0  1.0  3.0
+	2012-01-01 10:00:00  2.0  1.0  3.0
+	2012-01-01 11:00:00  2.0  1.0  3.0
+	2012-01-01 12:00:00  2.0  1.0  3.0
 
  get output series
 
@@ -267,7 +267,7 @@
 	             ('name', 'importer-a'),
 	             ('comment', ''),
 	             ('model', 'cleaner'),
-	             ('last_run', datetime.datetime(2020, 4, 10, 7, 57, 18, 301630)),
+	             ('last_run', datetime.datetime(2020, 4, 13, 13, 28, 28, 462518)),
 	             ('last_clear', datetime.datetime(2020, 4, 10, 7, 57, 15, 399946)),
 	             ('project', '0d9b1d54-8fe7-4925-9b16-3d3636c467af'),
 	             ('related_importer', 'f7e0621b-f2d2-4bd7-9e8b-3e807ca3547c')])
@@ -293,9 +293,9 @@
 
 *out:*
 
-	<odata/unitcleaners: a-cleaned (0ce56f03-1b06-425e-b306-39206c45f765)>
-	<odata/unitcleaners: b-cleaned (c8e4428e-7ea2-4597-8efc-41b56f39b7c3)>
-	<odata/unitcleaners: c-cleaned (d9151e2d-318c-48a2-a3ab-3d5bb15629ce)>
+	<odata/unitcleaners: b-cleaned (05d153c4-e452-4971-b0fd-1ed5176ef5d5)>
+	<odata/unitcleaners: a-cleaned (a4dc6e12-2d9e-45c9-b6ea-cef97276e3ad)>
+	<odata/unitcleaners: c-cleaned (01ce29fd-5ce6-496e-802b-dd67ebaf44f3)>
 
  ### Configure using excel
  export configuration to excel
@@ -332,14 +332,14 @@
 
 *out:*
 
-	<odata/series: a-cleaned (5c404d73-b614-4337-ada7-4fd525c3b81c)>
-	<odata/series: b-cleaned (a94ee7ce-d489-442b-a490-f1ebbe6fd298)>
-	<odata/series: c-cleaned (900491d3-cc67-4c8f-b38c-73bb504a4d27)>
-	                     c-cleaned  b-cleaned  a-cleaned
-	2012-01-01 01:00:00        3.0        2.0        1.0
-	2012-01-01 02:00:00        3.0        2.0        1.0
-	2012-01-01 03:00:00        3.0        2.0        1.0
-	2012-01-01 04:00:00        3.0        2.0        1.0
+	<odata/series: b-cleaned (a12ccd9b-9354-41dc-bcdf-92b455233248)>
+	<odata/series: a-cleaned (e14da853-f384-4b36-8e21-b369f322dd76)>
+	<odata/series: c-cleaned (f9f8775b-3a58-400d-93d5-ace322192f1f)>
+	                     c-cleaned  a-cleaned  b-cleaned
+	2012-01-01 01:00:00        3.0        1.0        2.0
+	2012-01-01 02:00:00        3.0        1.0        2.0
+	2012-01-01 03:00:00        3.0        1.0        2.0
+	2012-01-01 04:00:00        3.0        1.0        2.0
 
  ## Analysis
 
@@ -368,12 +368,12 @@
 
 	OrderedDict([('id', 'aa2940e9-cc7e-47ea-87c8-6a7bffb866f3'),
 	             ('rights', None),
-	             ('analysisconfig', None),
-	             ('active', False),
+	             ('analysisconfig', 'b05eaa68-795c-453f-a02b-8bc6b1228ba1'),
+	             ('active', True),
 	             ('name', 'analysis-a'),
 	             ('comment', 'documentation analysis'),
 	             ('model', 'analysis'),
-	             ('last_run', None),
+	             ('last_run', datetime.datetime(2020, 4, 13, 13, 28, 39, 804879)),
 	             ('last_clear', None),
 	             ('project', '0d9b1d54-8fe7-4925-9b16-3d3636c467af')])
 
@@ -475,13 +475,13 @@
 	                           ('custom_delay', None),
 	                           ('analysis',
 	                            'aa2940e9-cc7e-47ea-87c8-6a7bffb866f3')])),
-	             ('active', False),
+	             ('active', True),
 	             ('is_obsolete', False),
 	             ('unresolved_notifications_nb', 0),
 	             ('name', 'analysis-a'),
 	             ('comment', 'documentation analysis'),
 	             ('model', 'analysis'),
-	             ('last_run', None),
+	             ('last_run', datetime.datetime(2020, 4, 13, 13, 28, 39, 804879)),
 	             ('last_clear', None),
 	             ('project', '0d9b1d54-8fe7-4925-9b16-3d3636c467af')])
 
@@ -512,7 +512,6 @@
 	print(analysis_df)
 
 
-
 *out:*
 
 	                     a-output
@@ -522,5 +521,48 @@
 	2012-01-01 12:00:00       1.5
 	2012-01-01 15:00:00       1.5
 	2012-01-01 18:00:00       1.5
+
+ ## Project overview
+
+
+
+ list and display records by type
+
+	print("Gates:")
+	for gate in project.list_all_gates():
+	    print(f"\t{gate}")
+
+	print("\nImporters:")
+	for importer in project.list_all_importers():
+	    print(f"\t{importer}")
+
+	print("\nCleaners:")
+	for cleaner in project.list_all_cleaners():
+	    print(f"\t{cleaner}")
+
+	print("\nAnalyses:")
+	for analysis in project.list_all_analyses():
+	    print(f"\t{analysis}")
+
+	print(f"\nNon-resolved notifications:")
+	for notification in project.list_all_notifications(resolved=False):
+	    print(f"\t{notification}")
+
+
+*out:*
+
+	Gates:
+		<odata/gates: gate (0af8ead9-612a-46f8-a250-8545937101aa)>
+
+	Importers:
+		<odata/importers: importer-a (f7e0621b-f2d2-4bd7-9e8b-3e807ca3547c)>
+
+	Cleaners:
+		<odata/cleaners: importer-a (c49b62ff-3f9d-4db4-9d93-b47c8eb77c00)>
+
+	Analyses:
+		<odata/analyses: analysis-a (aa2940e9-cc7e-47ea-87c8-6a7bffb866f3)>
+
+	Non-resolved notifications:
 
 
