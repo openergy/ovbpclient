@@ -2,8 +2,9 @@
 
 (p): patch, (m): minor, (M): major
 
-## next
+## 1.0.3
 * p: enhanced documentation
+* p: openpyxl requirement was loosened
 
 ## 1.0.2
 * p: prepared for pypi
