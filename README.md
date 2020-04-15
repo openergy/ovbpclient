@@ -44,15 +44,13 @@ Initialize client:
 
     from ovbpclient import Client
     
-    # first method (auth_path is the path of a file containing login\npassword)
+    # first method (see above for auth file content)
     client = Client(auth_path)
     
-Instead of a path, you can give a buffer, which may be usefull if your credentials are in memory:
+Instead of a path, you can give a buffer, which may be useful in some cases:
 
-    # suppose my credentials are stored in two variables: login and password
-    import io
-    buffer= io.StringIO(f"{login}\n{password")
-    client = Client(buffer)
+    with open(auth_path) as f:
+        client = Client(f)
     
 
 #### Endpoints

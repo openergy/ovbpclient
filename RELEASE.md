@@ -3,6 +3,7 @@
 (p): patch, (m): minor, (M): major
 
 ## next
+* p: light documentation changes
 
 ## 1.0.3
 * p: enhanced documentation
