@@ -1,21 +1,24 @@
  # ovbpclient
 
- ## initialization
+ ## Initialization
 
 
 
- ### imports
+ ### Imports
 
 	import os
 	import datetime as dt
 	import pprint
+	import logging
 
 	import pandas as pd
 
 	from ovbpclient import Client, RecordDoesNotExistError
 
+	logging.basicConfig(level=logging.INFO)  # to benefit from information logs
 
- ### prepare client
+
+ ### Prepare client
 
 
 	# auth file is a text file with two lines: the first one contains login, the second password
@@ -165,10 +168,10 @@
 	             ('re_run_last_file', False),
 	             ('notify_missing_files_nb', 0),
 	             ('max_ante_scanned_files_nb', 0),
-	             ('last_run', datetime.datetime(2020, 4, 13, 11, 46, 42, 41112)),
-	             ('last_clear', datetime.datetime(2020, 4, 10, 16, 54, 40, 854481)),
+	             ('last_run', datetime.datetime(2020, 4, 16, 15, 14, 59, 248897)),
+	             ('last_clear', datetime.datetime(2020, 4, 16, 9, 50, 33, 229508)),
 	             ('last_imported_path', 'first.json'),
-	             ('latest_imported_mdate', '2020-04-10T13:18:51Z'),
+	             ('latest_imported_mdate', '2020-04-13T13:28:23Z'),
 	             ('project', '0d9b1d54-8fe7-4925-9b16-3d3636c467af'),
 	             ('gate', '0af8ead9-612a-46f8-a250-8545937101aa')])
 
@@ -195,6 +198,12 @@
 	time.sleep(5)
 
 
+ **The following method is appropriate if the request is not too big (we advise less than 10000 points). If your request concerns more
+ points, the response will be truncated and the retrieved data will be incomplete. In that case, you shoud use a
+ data export - see in [Series data export](#series-data-export) chapter.**
+
+
+
  retrieve all series
 
 	importer_series = importer.list_all_output_series()
@@ -204,9 +213,9 @@
 
 *out:*
 
-	<odata/series: c (90a794f4-1439-4338-9a29-1c9d8e75d1d0)>
-	<odata/series: a (7a6c8e06-abe0-4f23-b81e-45af2a27c028)>
-	<odata/series: b (bb31ab30-a9f4-46ef-80d4-03c365962bd1)>
+	<odata/series: c (33104161-ad6e-4936-9c90-295c06c41138)>
+	<odata/series: b (a0e35f5a-21bb-484c-b9c9-33a287a69b5b)>
+	<odata/series: a (3d33553d-0bec-4bcc-ba63-a1215ccee8a2)>
 
  get output dataframe
 
@@ -220,14 +229,14 @@
 
 *out:*
 
-	                       b    a    c
-	2012-01-01 06:00:00  2.0  1.0  3.0
-	2012-01-01 07:00:00  2.0  1.0  3.0
-	2012-01-01 08:00:00  2.0  1.0  3.0
-	2012-01-01 09:00:00  2.0  1.0  3.0
-	2012-01-01 10:00:00  2.0  1.0  3.0
-	2012-01-01 11:00:00  2.0  1.0  3.0
-	2012-01-01 12:00:00  2.0  1.0  3.0
+	                       a    b    c
+	2012-01-01 06:00:00  1.0  2.0  3.0
+	2012-01-01 07:00:00  1.0  2.0  3.0
+	2012-01-01 08:00:00  1.0  2.0  3.0
+	2012-01-01 09:00:00  1.0  2.0  3.0
+	2012-01-01 10:00:00  1.0  2.0  3.0
+	2012-01-01 11:00:00  1.0  2.0  3.0
+	2012-01-01 12:00:00  1.0  2.0  3.0
 
  get output series
 
@@ -267,8 +276,8 @@
 	             ('name', 'importer-a'),
 	             ('comment', ''),
 	             ('model', 'cleaner'),
-	             ('last_run', datetime.datetime(2020, 4, 13, 13, 28, 28, 462518)),
-	             ('last_clear', datetime.datetime(2020, 4, 10, 7, 57, 15, 399946)),
+	             ('last_run', datetime.datetime(2020, 4, 16, 15, 18, 14, 372013)),
+	             ('last_clear', datetime.datetime(2020, 4, 16, 9, 50, 43, 528043)),
 	             ('project', '0d9b1d54-8fe7-4925-9b16-3d3636c467af'),
 	             ('related_importer', 'f7e0621b-f2d2-4bd7-9e8b-3e807ca3547c')])
 
@@ -293,9 +302,9 @@
 
 *out:*
 
-	<odata/unitcleaners: b-cleaned (05d153c4-e452-4971-b0fd-1ed5176ef5d5)>
-	<odata/unitcleaners: a-cleaned (a4dc6e12-2d9e-45c9-b6ea-cef97276e3ad)>
-	<odata/unitcleaners: c-cleaned (01ce29fd-5ce6-496e-802b-dd67ebaf44f3)>
+	<odata/unitcleaners: a-cleaned (69cce9f8-9b7c-4220-bff0-cb89bf562bb6)>
+	<odata/unitcleaners: b-cleaned (8b3765d2-0fa7-4907-9149-e0324b54791e)>
+	<odata/unitcleaners: c-cleaned (ca56d52a-3975-4e16-bc5f-8f4dd620b52a)>
 
  ### Configure using excel
  export configuration to excel
@@ -310,6 +319,12 @@
 
 
  ### Work with series
+
+
+
+ **The following method is appropriate if the request is not too big (we advise less than 10000 points). If your request concerns more
+ points, the response will be truncated and the retrieved data will be incomplete. In that case, you shoud use a
+ data export - see in [Series data export](#series-data-export) chapter.**
 
 
 
@@ -332,20 +347,20 @@
 
 *out:*
 
-	<odata/series: b-cleaned (a12ccd9b-9354-41dc-bcdf-92b455233248)>
-	<odata/series: a-cleaned (e14da853-f384-4b36-8e21-b369f322dd76)>
-	<odata/series: c-cleaned (f9f8775b-3a58-400d-93d5-ace322192f1f)>
-	                     c-cleaned  a-cleaned  b-cleaned
-	2012-01-01 01:00:00        3.0        1.0        2.0
-	2012-01-01 02:00:00        3.0        1.0        2.0
-	2012-01-01 03:00:00        3.0        1.0        2.0
-	2012-01-01 04:00:00        3.0        1.0        2.0
+	<odata/series: a-cleaned (922b50e9-747f-4358-8d51-bdfd73561d3e)>
+	<odata/series: b-cleaned (ff2dcdaf-5970-4344-9a74-09aa5ad50326)>
+	<odata/series: c-cleaned (88e248f8-fda2-47c7-b4b6-2d1cd7ccc1d4)>
+	                     c-cleaned  b-cleaned  a-cleaned
+	2012-01-01 01:00:00        3.0        2.0        1.0
+	2012-01-01 02:00:00        3.0        2.0        1.0
+	2012-01-01 03:00:00        3.0        2.0        1.0
+	2012-01-01 04:00:00        3.0        2.0        1.0
 
  ## Analysis
 
 
 
- ### create and configure
+ ### Create and configure
 
 
 
@@ -373,8 +388,8 @@
 	             ('name', 'analysis-a'),
 	             ('comment', 'documentation analysis'),
 	             ('model', 'analysis'),
-	             ('last_run', datetime.datetime(2020, 4, 13, 13, 28, 39, 804879)),
-	             ('last_clear', None),
+	             ('last_run', datetime.datetime(2020, 4, 16, 15, 18, 26, 673364)),
+	             ('last_clear', datetime.datetime(2020, 4, 16, 9, 50, 48, 936804)),
 	             ('project', '0d9b1d54-8fe7-4925-9b16-3d3636c467af')])
 
  configure inputs if not already done
@@ -477,12 +492,12 @@
 	                            'aa2940e9-cc7e-47ea-87c8-6a7bffb866f3')])),
 	             ('active', True),
 	             ('is_obsolete', False),
-	             ('unresolved_notifications_nb', 0),
+	             ('unresolved_notifications_nb', 1),
 	             ('name', 'analysis-a'),
 	             ('comment', 'documentation analysis'),
 	             ('model', 'analysis'),
-	             ('last_run', datetime.datetime(2020, 4, 13, 13, 28, 39, 804879)),
-	             ('last_clear', None),
+	             ('last_run', datetime.datetime(2020, 4, 16, 15, 18, 26, 673364)),
+	             ('last_clear', datetime.datetime(2020, 4, 16, 9, 50, 48, 936804)),
 	             ('project', '0d9b1d54-8fe7-4925-9b16-3d3636c467af')])
 
  run analysis
@@ -497,6 +512,12 @@
 
 
  ### Work with series
+
+
+
+ **The following method is appropriate if the request is not too big (we advise less than 10000 points). If your request concerns more
+ points, the response will be truncated and the retrieved data will be incomplete. In that case, you shoud use a
+ data export - see in [Series data export](#series-data-export) chapter.**
 
 
 
@@ -562,7 +583,79 @@
 
 	Analyses:
 		<odata/analyses: analysis-a (aa2940e9-cc7e-47ea-87c8-6a7bffb866f3)>
+		<odata/analyses: metadata-test (ce639585-2287-49c0-ba99-d67a96dff387)>
 
 	Non-resolved notifications:
+		<odata/notifications: Analysis obsolete (8d00ea68-ec78-4838-bf30-941aa1a778dd)>
+
+ ## Series data export
+
+
+
+ this is the most robust method to export data
+
+
+	# prepare series
+	project_series = project.list_all_series()
+
+
+ export using series mode (which is default): returns a list of series
+
+
+	se_l = client.series.export_download_and_parse_data(project_series)
+	for se in se_l:
+	    print(se.name)
+
+
+
+*out:*
+
+	a cleaned [cleaner=importer a]
+	a output [analysis=analysis a]
+	a [importer=importer a]
+	b cleaned [cleaner=importer a]
+	b [importer=importer a]
+	c cleaned [cleaner=importer a]
+	c [importer=importer a]
+
+ export using dataframe mode: returns a dataframe
+
+
+	df = client.series.export_download_and_parse_data(
+	    project_series,
+	    out_mode="dataframe",
+	    out_freq="1H",
+	    clock="tzt"
+	)
+	print(df)
+
+
+*out:*
+
+	                     a [importer=importer a]  ...  c cleaned [cleaner=importer a]
+	2012-01-01 03:00:00                      1.0  ...                             3.0
+	2012-01-01 04:00:00                      1.0  ...                             3.0
+	2012-01-01 05:00:00                      1.0  ...                             3.0
+	2012-01-01 06:00:00                      1.0  ...                             3.0
+	2012-01-01 07:00:00                      1.0  ...                             3.0
+	2012-01-01 08:00:00                      1.0  ...                             3.0
+	2012-01-01 09:00:00                      1.0  ...                             3.0
+	2012-01-01 10:00:00                      1.0  ...                             3.0
+	2012-01-01 11:00:00                      1.0  ...                             3.0
+	2012-01-01 12:00:00                      1.0  ...                             3.0
+	2012-01-01 13:00:00                      1.0  ...                             3.0
+	2012-01-01 14:00:00                      1.0  ...                             3.0
+	2012-01-01 15:00:00                      1.0  ...                             3.0
+	2012-01-01 16:00:00                      1.0  ...                             3.0
+	2012-01-01 17:00:00                      1.0  ...                             3.0
+	2012-01-01 18:00:00                      1.0  ...                             3.0
+	2012-01-01 19:00:00                      1.0  ...                             3.0
+	2012-01-01 20:00:00                      1.0  ...                             3.0
+
+	[18 rows x 7 columns]
+
+ in both cases, you export will be available in your user ftp (export -> ftp -> series_exports directory)
+
+
 
 

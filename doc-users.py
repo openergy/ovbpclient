@@ -11,18 +11,21 @@ WORK_DIR_PATH = "gitignore"
 
 #@ # ovbpclient
 #@
-#@ ## initialization
+#@ ## Initialization
 
-#@ ### imports
+#@ ### Imports
 import os
 import datetime as dt
 import pprint
+import logging
 
 import pandas as pd
 
 from ovbpclient import Client, RecordDoesNotExistError
 
-#@ ### prepare client
+logging.basicConfig(level=logging.INFO)  # to benefit from information logs
+
+#@ ### Prepare client
 
 # auth file is a text file with two lines: the first one contains login, the second password
 client = Client(AUTH_PATH)
@@ -133,6 +136,10 @@ importer.deactivate()
 #@ wait for run to finish
 time.sleep(5)
 
+#@ **The following method is appropriate if the request is not too big (we advise less than 10000 points). If your request concerns more
+#@ points, the response will be truncated and the retrieved data will be incomplete. In that case, you shoud use a
+#@ data export - see in [Series data export](#series-data-export) chapter.**
+
 #@ retrieve all series
 importer_series = importer.list_all_output_series()
 for se in importer_series:
@@ -188,6 +195,10 @@ cleaner.configure_from_excel(xlsx_path)
 
 #@ ### Work with series
 
+#@ **The following method is appropriate if the request is not too big (we advise less than 10000 points). If your request concerns more
+#@ points, the response will be truncated and the retrieved data will be incomplete. In that case, you shoud use a
+#@ data export - see in [Series data export](#series-data-export) chapter.**
+
 #@ wait for run to finish
 time.sleep(5)
 
@@ -206,7 +217,7 @@ print(cleaner_df)
 ## ---------------------------------------------------------------------------------------------------------------------
 #@ ## Analysis
 
-#@ ### create and configure
+#@ ### Create and configure
 
 #@ create analysis if it does not exist
 analysis_name = "analysis-a"
@@ -272,6 +283,10 @@ if not analysis.active:
 
 #@ ### Work with series
 
+#@ **The following method is appropriate if the request is not too big (we advise less than 10000 points). If your request concerns more
+#@ points, the response will be truncated and the retrieved data will be incomplete. In that case, you shoud use a
+#@ data export - see in [Series data export](#series-data-export) chapter.**
+
 #@ wait for run to finish
 time.sleep(5)
 
@@ -305,6 +320,35 @@ for analysis in project.list_all_analyses():
 print(f"\nNon-resolved notifications:")
 for notification in project.list_all_notifications(resolved=False):
     print(f"\t{notification}")
+
+## ---------------------------------------------------------------------------------------------------------------------
+## ----------------------------------------- Series data export --------------------------------------------------------
+## ---------------------------------------------------------------------------------------------------------------------
+#@ ## Series data export
+
+#@ this is the most robust method to export data
+
+# prepare series
+project_series = project.list_all_series()
+
+#@ export using series mode (which is default): returns a list of series
+
+se_l = client.series.export_download_and_parse_data(project_series)
+for se in se_l:
+    print(se.name)
+
+
+#@ export using dataframe mode: returns a dataframe
+
+df = client.series.export_download_and_parse_data(
+    project_series,
+    out_mode="dataframe",
+    out_freq="1H",
+    clock="tzt"
+)
+print(df)
+
+#@ in both cases, you export will be available in your user ftp (export -> ftp -> series_exports directory)
 
 ## ---------------------------------------------------------------------------------------------------------------------
 ## ----------------------------------------------- cleanup -------------------------------------------------------------

@@ -22,3 +22,12 @@ class RecordDoesNotExistError(OVBPClientError):
 
 class MultipleRecordsReturnedError(OVBPClientError):
     pass
+
+
+class TaskDidNotFinishSuccessfully(OVBPClientError):
+    def __init__(self, task_id, status):
+        self.task_id = task_id
+        self.status = status
+
+    def __str__(self):
+        return f"Task '{self.task_id}' did not finish successfully. Status: '{self.status}'."

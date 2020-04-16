@@ -34,11 +34,12 @@ class Importer(BaseModel, ActiveModelMixin, GeneratorModelMixin):
         self.update(**data)
 
     def run(self):
-        self.detail_action(
+        rep_data = self.detail_action(
             "post",
             "action",
             data=dict(name="run")
         )
+        return self.client.importer_tasks.data_to_record(rep_data)
 
     def reset(self, partial_instant=None, last_imported_path=None):
         if last_imported_path is not None:
@@ -48,8 +49,9 @@ class Importer(BaseModel, ActiveModelMixin, GeneratorModelMixin):
         if partial_instant is not None:
             data["partial_instant"] = partial_instant
 
-        self.detail_action(
+        rep_data = self.detail_action(
             "post",
             "action",
             data=data
         )
+        return self.client.importer_tasks.data_to_record(rep_data)

@@ -3,7 +3,8 @@
 (p): patch, (m): minor, (M): major
 
 ## next
-* p: light documentation changes
+* m: task model and task endpoints where created
+* m: series exports are now available
 
 ## 1.0.3
 * p: enhanced documentation

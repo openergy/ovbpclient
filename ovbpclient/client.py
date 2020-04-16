@@ -48,6 +48,22 @@ class Client:
             "oteams/projects",
             model_cls=oteams_models.Project
         )
+        self.users = BaseEndpoint(
+            self,
+            "oteams/users",
+            model_cls=oteams_models.User
+        )
+
+        # odata - users
+        self.odata_users = BaseEndpoint(
+            self,
+            "odata/users"
+        )
+        self.user_ftp_accounts = BaseEndpoint(
+            self,
+            "odata/user_ftp_accounts",
+            model_cls=odata_models.FtpAccount
+        )
 
         # odata - projects
         self.odata_projects = BaseEndpoint(
@@ -71,12 +87,22 @@ class Client:
             "odata/gate_ftp_accounts",
             model_cls=odata_models.GateFtpAccount
         )
+        self.base_feeder_tasks = BaseEndpoint(
+            self,
+            "odata/base_feeder_tasks",
+            model_cls=odata_models.Task
+        )
 
         # odata - importers
         self.importers = BaseEndpoint(
             self,
             "odata/importers",
             model_cls=odata_models.Importer
+        )
+        self.importer_tasks = BaseEndpoint(
+            self,
+            "odata/importer_tasks",
+            model_cls=odata_models.Task
         )
         self.importer_series = BaseEndpoint(
             self,
@@ -92,6 +118,11 @@ class Client:
         self.unitcleaners = BaseEndpoint(
             self,
             "odata/unitcleaners"
+        )
+        self.cleaner_tasks = BaseEndpoint(
+            self,
+            "odata/cleaner_tasks",
+            model_cls=odata_models.Task
         )
 
         # odata - analysis
@@ -112,12 +143,23 @@ class Client:
             self,
             "odata/analysis_outputs"
         )
+        self.analysis_tasks = BaseEndpoint(
+            self,
+            "odata/analysis_tasks",
+            model_cls=odata_models.Task
+        )
 
         # odata - series
         self.series = SeriesEndpoint(
             self,
             "odata/series",
             model_cls=odata_models.Series
+        )
+
+        self.series_export_tasks = BaseEndpoint(
+            self,
+            "odata/series_export_tasks",
+            model_cls=odata_models.Task
         )
 
         # odata - notifications

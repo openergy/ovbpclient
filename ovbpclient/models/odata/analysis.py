@@ -5,12 +5,12 @@ from .mixin_generator import GeneratorModelMixin
 
 class Analysis(BaseModel, ActiveModelMixin, GeneratorModelMixin):
     def run(self):
-        self.detail_action(
+        rep_data = self.detail_action(
             "post",
             "action",
             data=dict(name="run")
-
         )
+        return self.client.analysis_tasks.data_to_record(rep_data)
 
     def _partial_action(self, action, partial_instant=None):
         data = dict(name=action)
@@ -25,10 +25,12 @@ class Analysis(BaseModel, ActiveModelMixin, GeneratorModelMixin):
         )
 
     def clear(self, partial_instant=None):
-        return self._partial_action("clear", partial_instant=partial_instant)
+        rep_data = self._partial_action("clear", partial_instant=partial_instant)
+        return self.client.analysis_tasks.data_to_record(rep_data)
 
     def reset(self, partial_instant=None):
-        return self._partial_action("reset", partial_instant=partial_instant)
+        rep_data = self._partial_action("reset", partial_instant=partial_instant)
+        return self.client.analysis_tasks.data_to_record(rep_data)
 
     # analysis config
     def get_analysis_config(self):

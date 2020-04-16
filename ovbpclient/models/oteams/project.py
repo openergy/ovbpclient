@@ -67,6 +67,10 @@ class Project(BaseModel):
     def list_all_analyses(self) -> List["odata_models.Analysis"]:
         return self._list_all(self.client.analyses)
 
+    # series
+    def list_all_series(self) -> List["odata_models.Series"]:
+        return self._list_all(self.client.series)
+
     # notifications
     def list_all_notifications(self, resolved=None) -> List["odata_models.Notification"]:
         other_filters = None if resolved is None else dict(resolved=resolved)
