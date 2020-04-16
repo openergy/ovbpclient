@@ -2,7 +2,7 @@
 
 (p): patch, (m): minor, (M): major
 
-## next
+## 1.1.0
 * m: task model and task endpoints where created
 * m: series exports are now available
 
