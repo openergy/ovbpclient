@@ -348,7 +348,7 @@ df = client.series.export_download_and_parse_data(
 )
 print(df)
 
-#@ in both cases, you export will be available in your user ftp (export -> ftp -> series_exports directory)
+#@ in both cases, your export will be available in your user ftp (export -> ftp -> series_exports directory)
 
 ## ---------------------------------------------------------------------------------------------------------------------
 ## ----------------------------------------------- cleanup -------------------------------------------------------------

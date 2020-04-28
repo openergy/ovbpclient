@@ -107,12 +107,14 @@ class Cleaner(BaseModel, GeneratorModelMixin):
             if unitcleaner is not None:
                 diff = dict()
                 for k, v in excel_unitcleaner_data.items():
-                    if getattr(unitcleaner, v) != v:
+                    if getattr(unitcleaner, k) != v:
                         diff[k] = v
                 # if diff, update
                 if len(diff) > 0:
                     logging.info(f"unitcleaner {unitcleaner.name} already exists, updating")
-                    unitcleaner.update(diff)
+                    unitcleaner.update(**diff)
+                else:
+                    logging.info(f"unitcleaner {unitcleaner.name} has not changed, skipping update")
 
             # 2. does not exist
             else:

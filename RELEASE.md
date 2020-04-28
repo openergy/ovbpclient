@@ -2,7 +2,9 @@
 
 (p): patch, (m): minor, (M): major
 
-## next
+## 1.1.1
+* p: excel cleaner config style modifications
+* p: unitcleaner excel update debug
 
 ## 1.1.0
 * m: task model and task endpoints where created
