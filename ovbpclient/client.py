@@ -82,6 +82,14 @@ class Client:
             "odata/base_feeders",
             model_cls=odata_models.BaseFeeder
         )
+        self.generic_basic_feeders = BaseEndpoint(
+            self,
+            "odata/generic_basic_feeders"
+        )
+        self.static_webservice_feeders = BaseEndpoint(
+            self,
+            "odata/static_webservice_feeder"
+        )
         self.gate_ftp_accounts = BaseEndpoint(
             self,
             "odata/gate_ftp_accounts",

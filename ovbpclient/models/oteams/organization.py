@@ -1,8 +1,13 @@
+from typing import List
+
 from .. import BaseModel, oteams as oteams_models
 from ...util import get_one_and_only_one
 
 
 class Organization(BaseModel):
+    def list_all_projects(self) -> List["oteams_models.Project"]:
+        return self.client.projects.list_all(filter_by=dict(organization=self.id))
+
     def get_project(self, name) -> "oteams_models.Project":
         projects_l = self.client.projects.list(
             limit=2,

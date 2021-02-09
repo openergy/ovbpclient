@@ -2,7 +2,10 @@
 
 (p): patch, (m): minor, (M): major
 
-## next
+## 1.2.0
+* m: generic basic and static webservice feeders where added to client
+* m: useful methods added to models
+* m: download tool coded
 
 ## 1.1.1
 * p: excel cleaner config style modifications

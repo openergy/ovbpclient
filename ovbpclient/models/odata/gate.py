@@ -1,3 +1,4 @@
+import ovbpclient
 from ..base import BaseModel
 
 
@@ -14,7 +15,7 @@ class Gate(BaseModel):
             data["crontab"] = crontab
         return self.client.base_feeders.create(**data)
 
-    def get_base_feeder(self):
+    def get_base_feeder(self) -> "ovbpclient.models.odata.BaseFeeder":
         if self.base_feeder is None:
             return None
         if not isinstance(self.base_feeder, dict):

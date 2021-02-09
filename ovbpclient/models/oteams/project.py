@@ -1,5 +1,6 @@
-from ovbpclient.models import odata as odata_models
 from typing import List
+
+from ovbpclient.models import odata as odata_models
 from ..base import BaseModel
 from ...util import get_one_and_only_one
 
