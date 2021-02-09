@@ -2,6 +2,8 @@
 
 (p): patch, (m): minor, (M): major
 
+## next
+
 ## 1.2.0
 * m: generic basic and static webservice feeders where added to client
 * m: useful methods added to models
