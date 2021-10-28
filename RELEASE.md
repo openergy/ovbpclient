@@ -2,7 +2,9 @@
 
 (p): patch, (m): minor, (M): major
 
-## next
+## 1.3.0
+* m: new tools chapter added
+* p: download_project file and directory names are slugified to ensure os compatibility
 
 ## 1.2.0
 * m: generic basic and static webservice feeders where added to client
