@@ -2,6 +2,8 @@
 
 (p): patch, (m): minor, (M): major
 
+## next
+
 ## 1.3.1
 * p: python-slugify requirements where widened
 
