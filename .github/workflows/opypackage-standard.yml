@@ -6,7 +6,7 @@ on:
 
 jobs:
   openergy:
-    uses: openergy/github-actions-workflows/.github/workflows/opypackage-standard-v02.yml@develop
+    uses: openergy/github-actions-workflows/.github/workflows/opypackage-standard-v02.yml@master
     with:
       publish-to-pypi: true
 
