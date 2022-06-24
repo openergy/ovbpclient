@@ -5,11 +5,13 @@ on:
       - develop
 
 jobs:
-  debug:
-    runs-on: ubuntu-latest
-    steps:
-      - name: pip build and publish
-        uses: openergy/ogithub-actions/actions/opypackage-pip-build-and-publish-v01@develop
-        with:
-          admin-github-token: ${{ secrets.ADMIN_GITHUB_TOKEN }}
-          pypi-openergy-password: ${{ secrets.PYPI_OPENERGY_PASSWORD }}
+  openergy:
+    uses: openergy/github-actions-workflows/.github/workflows/opypackage-standard-v02.yml@develop
+    with:
+      publish-to-pypi: true
+
+    secrets:
+      AZURE_CONDA_CHANNEL_KEY: ${{ secrets.AZURE_CONDA_CHANNEL_KEY }}
+      CONDA_CHANNEL_SYSADMIN_URL: ${{ secrets.CONDA_CHANNEL_SYSADMIN_URL }}
+      ADMIN_GITHUB_TOKEN: ${{ secrets.ADMIN_GITHUB_TOKEN }}
+      PYPI_OPENERGY_PASSWORD: ${{ secrets.PYPI_OPENERGY_PASSWORD }}
