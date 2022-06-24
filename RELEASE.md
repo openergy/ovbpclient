@@ -3,6 +3,8 @@
 (p): patch, (m): minor, (M): major
 
 ## next
+
+## next
 * m: new tools
 * m: activate/deactivate mail alerts
 * m: tasks are now returned on generator activation / deactivation
