@@ -1,1 +1,1 @@
-version = "devops-debug-01"
+version = ""
