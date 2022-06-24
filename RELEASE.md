@@ -2,7 +2,8 @@
 
 (p): patch, (m): minor, (M): major
 
-## next
+## 1.5.2
+* p: devops debug
 
 ## 1.5.1
 * p: devops debug
