@@ -27,7 +27,6 @@ def deactivate_project(project: "oteams_models.Project"):
     logging.info("")
 
 
-
 def deactivate_organization(organization: "oteams_models.Organization"):
     for project in organization.list_all_projects():
         deactivate_project(project)

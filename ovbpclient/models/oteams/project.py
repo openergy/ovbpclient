@@ -24,7 +24,7 @@ class Project(BaseModel):
     def odata_id(self):
         return self.odata["id"] if isinstance(self.odata, dict) else self.odata
 
-    def get_odata_project(self):
+    def get_odata_project(self) -> "odata_models.Project":
         data = self.odata if isinstance(self.odata, dict) else dict(id=self.odata)
         return self.client.odata_projects.data_to_record(data)
 

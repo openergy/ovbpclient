@@ -1,3 +1,4 @@
+from .project import Project
 from .gate import Gate
 from .base_feeder import BaseFeeder
 from .ftp_account import FtpAccount

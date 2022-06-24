@@ -68,7 +68,8 @@ class Client:
         # odata - projects
         self.odata_projects = BaseEndpoint(
             self,
-            "odata/projects"
+            "odata/projects",
+            model_cls=odata_models.Project
         )
 
         # odata - gates

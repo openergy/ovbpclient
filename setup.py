@@ -2,31 +2,36 @@ from setuptools import setup, find_packages
 from pkg_resources import parse_requirements
 import os
 
-with open(os.path.join("ovbpclient", "version.py")) as f:
+REPO_NAME, PACKAGE_NAME = "ovbpclient", "ovbpclient"
+
+with open(os.path.join(PACKAGE_NAME, "version.py")) as f:
     version = f.read().split("=")[1].strip().strip("'").strip('"')
 
 with open("requirements.txt", "r") as f:
-    requirements = [str(r).replace("pytables", "tables") for r in parse_requirements(f.read())]
+    requirements = [str(r) for r in parse_requirements(f.read())]
 
 setup(
-    name="ovbpclient",
+    name=PACKAGE_NAME,
     version=version,
-    packages=find_packages(),
-    author="Geoffroy d'Estaintot",
-    author_email="geoffroy.destaintot@openergy.fr",
-    long_description=open('README.md').read(),
+    packages=find_packages(exclude="tests"),
+    author="Openergy team",
+    author_email="contact@openergy.fr",
+    long_description=open("README.md").read(),
     install_requires=requirements,
-    url='https://github.com/openergy/ovbpclient',
+    url=f"https://github.com/openergy/{REPO_NAME}",
     classifiers=[
         "Programming Language :: Python",
         "Development Status :: 5 - Production/Stable",
+        "Intended Audience :: Science/Research",
         "Natural Language :: French",
         "Operating System :: POSIX :: Linux",
-        "Programming Language :: Python :: 3.4",
-        "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.1",
+        "Topic :: Scientific/Engineering :: Physics",
     ],
-    package_data={"ovbpclient": ['*.txt']},
+    package_data={PACKAGE_NAME: []},
     include_package_data=True
 )

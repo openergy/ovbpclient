@@ -18,6 +18,10 @@ logger = logging.getLogger(__name__)
 
 
 class Cleaner(BaseModel, GeneratorModelMixin):
+    @property
+    def _tasks_endpoint(self):
+        return self.client.cleaner_tasks
+
     def get_odata_project(self):
         return self.client.odata_projects.retrieve(self.project)
 

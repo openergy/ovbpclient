@@ -4,6 +4,10 @@ from .mixin_generator import GeneratorModelMixin
 
 
 class Importer(BaseModel, ActiveModelMixin, GeneratorModelMixin):
+    @property
+    def _tasks_endpoint(self):
+        return self.client.importer_tasks
+    
     def configure(
             self,
             gate=None,
