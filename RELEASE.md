@@ -2,6 +2,8 @@
 
 (p): patch, (m): minor, (M): major
 
+## next
+
 ## 1.5.0
 * m: new tools
 * m: activate/deactivate mail alerts
